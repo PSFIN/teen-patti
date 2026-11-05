@@ -7,6 +7,7 @@ Teen Patti for family and friends, played with pretend coins. No sign-up needed.
 - **Host a room**: one person opens the page, taps *Host a room* and shares the room code or invite link.
   The host's device runs the table, so it must stay open during the game.
 - **Join a room**: everyone else opens the link (or enters the code) on their own phone or laptop.
+- **Voice chat**: in a room, tap *Join voice chat* to talk while you play. You can mute or leave voice at any time. A player's seat glows green while they're talking.
 - **Pass and play**: one device passed around. Works offline.
 
 Devices connect to each other directly (WebRTC via [PeerJS](https://peerjs.com)), using PeerJS's free public server only to find each other.

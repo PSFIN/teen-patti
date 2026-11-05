@@ -7,6 +7,7 @@ Teen Patti for family and friends, played with pretend coins. No sign-up needed.
 - **Host a room**: one person opens the page, taps *Host a room* and shares the room code or invite link.
   The host's device runs the table, so it must stay open during the game.
 - **Join a room**: everyone else opens the link (or enters the code) on their own phone or laptop.
+- **Play with computer**: play against 1–5 computer players on your own device. The host can also add or remove computer players between rounds, and friends can still join with the room code.
 - **Voice chat**: in a room, tap *Join voice chat* to talk while you play. You can mute or leave voice at any time. A player's seat glows green while they're talking.
 - **Pass and play**: one device passed around. Works offline.
 

@@ -142,6 +142,7 @@ details.rules summary{cursor:pointer;font-weight:800}
   <section id="home" class="modes">
     <button class="mode" data-act="goHost"><b>Host a room</b><span>Start a table on this device and get a room code to send to everyone.</span></button>
     <button class="mode" data-act="goJoin"><b>Join a room</b><span>Enter the room code someone sent you.</span></button>
+    <button class="mode" data-act="goBots"><b>Play with computer</b><span>Play against computer players on this device. Friends can still join with the room code.</span></button>
     <button class="mode" data-act="goLocal"><b>Pass and play</b><span>One phone or laptop, passed around. Works offline.</span></button>
   </section>
   <div class="row" id="resumeRow" hidden><button data-act="resumeHost" id="resumeHostBtn">Resume hosting</button></div>
@@ -155,6 +156,9 @@ details.rules summary{cursor:pointer;font-weight:800}
       <label for="hCoins">Starting coins each<input id="hCoins" type="number" min="50" step="50" value="1000"></label>
       <label for="hBoot">Boot (entry per round)<input id="hBoot" type="number" min="1" step="1" value="10"></label>
       <label for="hLimit">Pot limit (0 = none)<input id="hLimit" type="number" min="0" step="10" value="1000"></label>
+      <label for="hBots">Computer players
+        <select id="hBots"><option value="0" selected>None</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select>
+      </label>
     </div>
     <div class="row"><button class="gold" data-act="createRoom">Create room</button><button class="ghost" data-act="home">Back</button></div>
   </section>
@@ -413,7 +417,17 @@ function handle(G, pid, m){
     case 'next':
       if (i < 0) return 'Take a seat first.';
       if (!['lobby','roundEnd'].includes(G.phase)) return 'A round is already in progress.';
+      G.seats.forEach(b => { if (b.bot && b.coins < G.boot){ b.coins += G.startCoins; glog(G, `${b.name} (computer) bought back in with ${G.startCoins} coins.`); } });
       return startRound(G) || G;
+    case 'addBot':
+      if (!['lobby','roundEnd'].includes(G.phase)) return 'Add computer players between rounds.';
+      return addBot(G) || G;
+    case 'removeBot': {
+      if (!['lobby','roundEnd'].includes(G.phase)) return 'Remove computer players between rounds.';
+      const k = G.seats.map(x => !!x.bot).lastIndexOf(true); if (k < 0) return G;
+      glog(G, `${G.seats[k].name} (computer) left.`); G.seats.splice(k, 1); if (k <= G.dealer) G.dealer--;
+      return G;
+    }
     case 'topup': {
       if (i < 0) return 'Take a seat first.';
       const s = G.seats[Number(m.arg)]; if (!s) return 'That player left.';
@@ -435,7 +449,63 @@ function handle(G, pid, m){
       return act(G, i, m.a) || G;
   }
 }
-window.__tp = {evaluate, cmp, newGame, newSeat, startRound, act, handle};
+// ================= computer players =================
+const BOT_NAMES = ['Raju','Pinky','Babloo','Chintu','Guddu','Sweety','Munna','Dolly'];
+function addBot(G){
+  if (G.seats.length >= 6) return 'The table is full (6 players).';
+  const used = new Set(G.seats.map(s => s.name));
+  const base = BOT_NAMES.find(n => !used.has(n)) || 'Bot';
+  G.botN = (G.botN || 0) + 1;
+  const s = newSeat('bot-' + G.botN, base, G.startCoins); s.bot = true;
+  G.seats.push(s); glog(G, `${base} (computer) sat down.`); return null;
+}
+// Hand strength 0..1 from the bot's own three cards only.
+function botStrength(cards){
+  const e = evaluate(cards);
+  switch (e.cat){
+    case 6: return 1; case 5: return .95; case 4: return .88;
+    case 3: return .7 + e.tb[0] / 200;
+    case 2: return .45 + e.tb[0] / 50;
+    default: return Math.max(0, (e.tb[0] - 6) / 24);
+  }
+}
+// Which seat is a computer that has to act right now (-1 if none).
+function botActor(G){
+  if (G.phase === 'play'){ const s = G.seats[G.turn]; return s && s.bot ? G.turn : -1; }
+  if (G.phase === 'sideAsk'){ const s = G.seats[G.sideshow.to]; return s && s.bot ? G.sideshow.to : -1; }
+  return -1;
+}
+// One move for bot seat i. Uses only its own cards and what's on the table.
+function botDecide(G, i){
+  const s = G.seats[i], c = costs(G, s), two = active(G).length === 2, r = Math.random();
+  if (G.phase === 'sideAsk') return botStrength(s.cards) >= 0.5 ? 'sideYes' : 'sideNo';
+  const canBet = s.coins >= c.bet, canShow = two && s.coins >= c.show;
+  const canRaise = G.stake * 2 <= maxStake(G) && s.coins >= c.raise;
+  const fallback = canShow ? 'show' : 'pack';
+  const pressure = Math.min(1, Math.max(G.stake / (G.boot * 16), G.pot / (G.boot * 80)));   // more careful as the stake or pot climbs
+  if (!s.seen){
+    if (r < 0.25 + pressure * 0.6 || !canBet) return 'see';
+    if (two && G.stake >= 8 * G.boot && canShow && Math.random() < 0.3) return 'show';
+    return canRaise && Math.random() < 0.12 ? 'raise' : 'bet';
+  }
+  const st = botStrength(s.cards);
+  if (two){
+    if (st >= 0.75){
+      if (canShow && Math.random() < 0.15 + pressure * 0.6) return 'show';   // cash in as the stake climbs
+      if (canRaise && r < 0.45 && pressure < 0.6) return 'raise';
+      return canBet ? 'bet' : fallback;
+    }
+    if (st >= 0.45){ if (canShow && (G.stake >= 4 * G.boot || pressure >= 0.3 || r < 0.25)) return 'show'; return canBet ? 'bet' : fallback; }
+    if (r < 0.15 && canBet) return 'bet';          // the occasional bluff
+    return 'pack';
+  }
+  if (st < 0.25 + pressure * 0.2) return r < 0.08 && canBet ? 'bet' : 'pack';
+  if (st >= 0.75 && canRaise && r < 0.4) return 'raise';
+  if (st >= 0.35 && st < 0.6 && canSide(G, i) && r < 0.3) return 'side';
+  if (st < 0.45 + pressure * 0.25 && r < 0.5) return 'pack';
+  return canBet ? 'bet' : 'pack';
+}
+window.__tp = {evaluate, cmp, newGame, newSeat, startRound, act, handle, addBot, botActor, botDecide, botStrength};
 
 // ================= device identity =================
 // One identity per browser tab (survives reloads), so two tabs or two devices are two players.
@@ -479,10 +549,21 @@ function viewFor(pid){
   v.code = V.code;
   return v;
 }
+let botTimer = null;
+function scheduleBots(){
+  clearTimeout(botTimer);
+  if (V.mode !== 'host' || !HG || botActor(HG) < 0) return;
+  botTimer = setTimeout(() => {
+    const i = botActor(HG); if (i < 0) return;
+    const uid = HG.seats[i].uid, a = botDecide(HG, i);
+    if (hostApply(uid, {a})) hostApply(uid, {a:'pack'});   // safety net: never stall the table
+  }, 1100 + Math.random() * 1100);
+}
 function broadcast(){
   store.set(K.host, JSON.stringify({code:V.code, g:HG, pid:PID}));
   for (const [pid, c] of NET.conns) if (c.open) { try { c.send({t:'state', g:viewFor(pid)}); } catch(e){} }
   G = viewFor(PID); render();
+  scheduleBots();
 }
 function hostApply(pid, m){
   const res = handle(clone(HG), pid, m);
@@ -490,7 +571,7 @@ function hostApply(pid, m){
   HG = res; broadcast(); return null;
 }
 function startHosting(){
-  if (!window.Peer){ V.netErr = "The connection library didn't load. Check your internet connection and reload."; render(); return; }
+  if (!window.Peer){ V.net = "Offline: friends can't join, but you can play the computer."; render(); return; }
   if (NET.peer) try { NET.peer.destroy(); } catch(e){}
   V.net = 'Opening the room…'; V.netErr = ''; render();
   if (HG.voice) HG.voice = {};
@@ -508,7 +589,7 @@ function startHosting(){
         if (m.name){ const e = hostApply(pid, {a:'join', name:m.name}); if (e) conn.send({t:'err', msg:e}); }
         broadcast(); return;
       }
-      if (m.t === 'req' && conn.pid){
+      if (m.t === 'req' && conn.pid && !['addBot','removeBot'].includes(m.a)){
         const e = hostApply(conn.pid, {a:String(m.a || ''), arg:m.arg, name:m.name, on:m.on, muted:m.muted, peer:conn.peer});
         if (e) conn.send({t:'err', msg:e});
       }
@@ -704,9 +785,10 @@ function seatHTML(s, i){
   const shown = G.phase === 'roundEnd' && res && res.hands.find(h => h.uid === s.uid);
   const isCur = (G.phase === 'play' && i === G.turn) || (G.phase === 'sideAsk' && i === G.sideshow.to);
   const isWin = G.phase === 'roundEnd' && res && res.winners.includes(s.uid);
-  const off = online() && G.online && !G.online.includes(s.uid);
+  const off = online() && G.online && !s.bot && !G.online.includes(s.uid);
   const pills = [];
   if (me) pills.push('<span class="pill you">You</span>');
+  if (s.bot) pills.push('<span class="pill">Computer</span>');
   if (off) pills.push('<span class="pill off">Offline</span>');
   const vc = online() && G.voice && G.voice[s.uid];
   if (vc) pills.push(vc.muted ? '<span class="pill off">Muted</span>' : '<span class="pill mic">Mic on</span>');
@@ -789,7 +871,13 @@ function lobbyHTML(){
     <p class="muted">${n} of 6 seated. Send the room code or link to everyone. You need at least 2 players to start.</p>
     <p class="muted">Boot ${G.boot} · starting coins ${G.startCoins.toLocaleString()}${G.potLimit ? ' · pot limit ' + G.potLimit.toLocaleString() : ''}</p>
     <div class="btns">${i >= 0 ? `<button class="gold" data-act="next" ${n >= 2 ? '' : 'disabled'}>Deal first round</button>${V.mode === 'client' ? '<button data-act="leaveSeat">Leave seat</button>' : ''}` : ''}</div>
+    ${botControls()}
   </section>`;
+}
+function botControls(){
+  if (V.mode !== 'host') return '';
+  const bots = G.seats.filter(s => s.bot).length;
+  return `<div class="btns"><button data-act="addBot" ${G.seats.length < 6 ? '' : 'disabled'}>Add computer player</button>${bots ? '<button class="ghost" data-act="removeBot">Remove a computer player</button>' : ''}</div>`;
 }
 
 function resultHTML(){
@@ -809,6 +897,7 @@ function resultHTML(){
     <div class="btns">${canAct ? `<button class="gold" data-act="next" ${canNext ? '' : 'disabled'}>Deal next round</button>` : ''}
       ${V.mode === 'client' && i >= 0 ? '<button data-act="leaveSeat">Leave seat</button>' : ''}</div>
     ${canNext ? '' : '<p class="why">Fewer than two players can pay the boot. Use +500 to top someone up.</p>'}
+    ${botControls()}
   </section>`;
 }
 
@@ -908,6 +997,8 @@ function onAct(a, arg){
     case 'home':
       leaveNet(); G = null; HG = null; V.net = ''; V.netErr = ''; V.mode = 'home'; setUrlRoom(''); render(); return;
     case 'goHost': V.mode = 'hostSetup'; render(); $('hName').focus(); return;
+    case 'goBots': $('hBots').value = '2'; V.mode = 'hostSetup'; render(); $('hName').focus(); return;
+    case 'addBot': case 'removeBot': request({a}); return;
     case 'goJoin': V.mode = 'joinSetup'; render(); ($('jName').value ? $('jCode') : $('jName')).focus(); return;
     case 'goLocal': V.mode = 'local'; G = null; render(); return;
     case 'createRoom': {
@@ -917,6 +1008,7 @@ function onAct(a, arg){
       const cfg = {startCoins:intVal('hCoins', 1000, 10), boot:intVal('hBoot', 10, 1), potLimit:Math.max(0, Math.floor(+$('hLimit').value || 0))};
       V.code = newCode();
       HG = newGame(cfg); HG.seats.push(newSeat(PID, name, cfg.startCoins)); glog(HG, `${name} opened room ${V.code}.`);
+      for (let b = +$('hBots').value || 0; b > 0; b--) addBot(HG);
       V.mode = 'host'; setUrlRoom(V.code); broadcast(); startHosting(); return;
     }
     case 'resumeHost': {

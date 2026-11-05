@@ -1,0 +1,869 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Teen Patti Table</title>
+<meta name="description" content="Play Teen Patti with friends and family using pretend coins. No sign-up.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Yatra+One&family=Mukta:wght@400;600;800&display=swap">
+<style>
+:root{
+  --bg:#130f29; --felt:#1d1844; --felt-2:#272061; --line:#3a3282;
+  --fg:#f4efe3; --muted:#a8a2cc; --gold:#f2b43c; --gold-deep:#b9761a;
+  --red:#d33b4a; --ok:#52c48d; --card:#fbf7ec; --ink:#1c1832;
+  --display:"Yatra One","Georgia",serif;
+  --body:"Mukta",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:dark;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{margin:0;background:radial-gradient(ellipse at 50% -10%,#2a2263 0%,var(--bg) 60%) fixed,var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.45;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px 24px}
+[hidden]{display:none!important}
+.wrap{max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+h1,h2,h3{font-family:var(--display);font-weight:400;margin:0;text-wrap:balance;letter-spacing:.01em}
+h1{font-size:2rem;color:var(--gold)}
+h2{font-size:1.45rem}
+p{margin:0;max-width:65ch}
+.muted{color:var(--muted)}
+.num{font-variant-numeric:tabular-nums}
+button{font:inherit;cursor:pointer;border-radius:10px;border:1px solid var(--line);background:var(--felt-2);color:var(--fg);padding:10px 14px;font-weight:600;line-height:1.15;transition:transform .08s,background .15s}
+button:hover:not(:disabled){background:#332b78}
+button:active:not(:disabled){transform:translateY(1px)}
+button:disabled{opacity:.4;cursor:not-allowed}
+button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+button.gold{background:linear-gradient(180deg,var(--gold),var(--gold-deep));color:var(--ink);border-color:var(--gold-deep)}
+button.gold:hover:not(:disabled){background:linear-gradient(180deg,#ffc95e,var(--gold))}
+button.danger{border-color:#6b2a3c;background:#3a1730}
+button.ghost{background:transparent}
+button small{display:block;font-weight:400;font-size:.78rem;opacity:.8;margin-top:2px}
+.coin{display:inline-block;width:.9em;height:.9em;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffe29a,var(--gold) 45%,var(--gold-deep));vertical-align:-.1em;margin-right:.25em;box-shadow:0 0 0 1px #00000040}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.top .sub{font-size:.9rem}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.panel{background:var(--felt);border:1px solid var(--line);border-radius:18px;padding:20px;display:flex;flex-direction:column;gap:16px}
+.panel.hl{border-color:var(--gold-deep)}
+.modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.mode{display:flex;flex-direction:column;gap:10px;align-items:flex-start;text-align:left;padding:20px;border-radius:16px}
+.mode b{font-family:var(--display);font-weight:400;font-size:1.4rem;color:var(--gold)}
+.mode span{font-weight:400;color:var(--muted)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+label{display:flex;flex-direction:column;gap:6px;font-size:.85rem;color:var(--muted);font-weight:600;letter-spacing:.03em}
+input,select{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-width:0}
+.names{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.joinrow{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.joinrow label{flex:1 1 180px}
+.code{font-family:var(--display);font-size:2rem;color:var(--gold);letter-spacing:.12em}
+.roombar{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:12px 16px;border-radius:14px;background:var(--felt);border:1px solid var(--line)}
+.roombar .code{font-size:1.5rem}
+.dot{display:inline-block;width:.6em;height:.6em;border-radius:50%;background:var(--ok);margin-right:.35em}
+.dot.off{background:var(--red)}
+
+.pot{display:flex;flex-direction:column;align-items:center;gap:2px;padding:18px 12px;border-radius:999px;background:radial-gradient(ellipse at center,var(--felt-2),var(--felt) 70%);border:1px solid var(--line);text-align:center}
+.pot .amt{font-family:var(--display);font-size:2.4rem;color:var(--gold);line-height:1}
+.pot .lbl{font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.pot .meta{font-size:.88rem;color:var(--muted)}
+.status{text-align:center;font-weight:600;display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap}
+.seats{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.seat{background:var(--felt);border:1px solid var(--line);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.seat.cur{border-color:var(--gold);box-shadow:0 0 0 2px #f2b43c55,0 8px 24px #0006}
+.seat.packed,.seat.out{opacity:.55}
+.seat.win{border-color:var(--ok);box-shadow:0 0 0 2px #52c48d66}
+.seat .nm{font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.seat .sr{display:flex;justify-content:space-between;align-items:center;gap:6px}
+.pills{display:flex;gap:4px;flex-wrap:wrap}
+.pill{font-size:.68rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+.pill.blind{color:#c8b8ff;border-color:#5b4bb0}
+.pill.seen{color:var(--gold);border-color:var(--gold-deep)}
+.pill.packed,.pill.off{color:#e7889a;border-color:#6b2a3c}
+.pill.dealer{background:var(--fg);color:var(--ink);border-color:var(--fg)}
+.pill.you{color:var(--ok);border-color:#2f7a57}
+.mini{display:flex;gap:4px}
+
+.card{--w:46px;width:var(--w);height:calc(var(--w)*1.4);border-radius:calc(var(--w)*.12);background:var(--card);color:var(--ink);position:relative;flex:none;box-shadow:0 2px 6px #0007;font-weight:800;font-size:calc(var(--w)*.3)}
+.card.red{color:var(--red)}
+.card .c-r{position:absolute;top:5%;left:9%;line-height:1}
+.card .c-s{position:absolute;inset:0;display:grid;place-items:center;font-size:calc(var(--w)*.55)}
+.card .c-r2{position:absolute;bottom:5%;right:9%;line-height:1;transform:rotate(180deg)}
+.card.back{background:repeating-linear-gradient(45deg,#8a2338 0 6px,#a02c43 6px 12px);border:3px solid var(--card)}
+.card.back::after{content:"";position:absolute;inset:18%;border-radius:50%;border:2px solid #f2b43c99}
+.card.sm{--w:34px}
+.card.lg{--w:74px}
+.card.deal{animation:deal .35s ease-out both}
+@keyframes deal{from{transform:translateY(-10px) rotate(-6deg);opacity:.5}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){.card.deal{animation:none}}
+
+.dock{background:linear-gradient(180deg,var(--felt-2),var(--felt));border:1px solid var(--gold-deep);border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:14px}
+.dock .who{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.hand{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.handname{font-family:var(--display);font-size:1.2rem;color:var(--gold)}
+.acts{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}
+.why{font-size:.85rem;color:var(--muted)}
+.log{display:flex;flex-direction:column;gap:4px;font-size:.9rem;color:var(--muted);margin:0;padding:0;list-style:none}
+.log li:first-child{color:var(--fg)}
+details.rules{background:var(--felt);border:1px solid var(--line);border-radius:14px;padding:12px 16px}
+details.rules summary{cursor:pointer;font-weight:800}
+.rules ol{padding-left:1.2em;margin:8px 0}
+.rules li{margin:4px 0}
+.rules p{margin:8px 0}
+.ov{position:fixed;inset:0;background:#0b0820f2;display:grid;place-items:center;z-index:20;
+  padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));overflow:auto}
+.ov .box{width:min(560px,100%);background:var(--felt);border:1px solid var(--gold-deep);border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:16px;text-align:center;align-items:center}
+.big{font-family:var(--display);font-size:2.2rem;color:var(--gold);line-height:1.1}
+.btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.cmp{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;width:100%}
+.cmp .side{background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:8px;align-items:center}
+.cmp .side.win{border-color:var(--ok)}
+.bal{display:flex;flex-direction:column;gap:6px;text-align:left;width:100%}
+.bal .r{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 10px;border-radius:10px;background:var(--bg)}
+.bal button{padding:5px 10px;font-size:.85rem}
+.result{text-align:center;align-items:center}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));background:var(--fg);color:var(--ink);padding:10px 16px;border-radius:12px;font-weight:600;z-index:30;max-width:calc(100% - 32px);box-shadow:0 8px 24px #0008}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>Teen Patti</h1>
+      <div class="sub muted" id="sub">Pretend coins only · no sign-up</div>
+    </div>
+    <div class="row" id="toprow" hidden>
+      <button class="ghost" data-act="reset" id="resetBtn">New game</button>
+      <button class="ghost" data-act="home" id="homeBtn">Leave room</button>
+    </div>
+  </header>
+
+  <!-- HOME -->
+  <section id="home" class="modes">
+    <button class="mode" data-act="goHost"><b>Host a room</b><span>Start a table on this device and get a room code to send to everyone.</span></button>
+    <button class="mode" data-act="goJoin"><b>Join a room</b><span>Enter the room code someone sent you.</span></button>
+    <button class="mode" data-act="goLocal"><b>Pass and play</b><span>One phone or laptop, passed around. Works offline.</span></button>
+  </section>
+  <div class="row" id="resumeRow" hidden><button data-act="resumeHost" id="resumeHostBtn">Resume hosting</button></div>
+
+  <!-- HOST SETUP -->
+  <section class="panel hl" id="hostSetup" hidden>
+    <h2>Host a room</h2>
+    <p class="muted">Keep this page open while you play. Your device runs the table, so the game ends if you close it.</p>
+    <div class="grid2">
+      <label for="hName">Your name<input id="hName" maxlength="14" placeholder="Your name" autocomplete="nickname"></label>
+      <label for="hCoins">Starting coins each<input id="hCoins" type="number" min="50" step="50" value="1000"></label>
+      <label for="hBoot">Boot (entry per round)<input id="hBoot" type="number" min="1" step="1" value="10"></label>
+      <label for="hLimit">Pot limit (0 = none)<input id="hLimit" type="number" min="0" step="10" value="1000"></label>
+    </div>
+    <div class="row"><button class="gold" data-act="createRoom">Create room</button><button class="ghost" data-act="home">Back</button></div>
+  </section>
+
+  <!-- JOIN -->
+  <section class="panel hl" id="joinSetup" hidden>
+    <h2>Join a room</h2>
+    <div class="grid2">
+      <label for="jName">Your name<input id="jName" maxlength="14" placeholder="Your name" autocomplete="nickname"></label>
+      <label for="jCode">Room code<input id="jCode" maxlength="6" placeholder="e.g. K7MPQ" autocapitalize="characters" style="text-transform:uppercase;letter-spacing:.1em"></label>
+    </div>
+    <div class="row"><button class="gold" data-act="joinRoom">Join</button><button class="ghost" data-act="home">Back</button></div>
+  </section>
+
+  <!-- LOCAL SETUP -->
+  <section class="panel" id="localSetup" hidden>
+    <h2>Pass and play</h2>
+    <div class="grid2">
+      <label for="cnt">Players
+        <select id="cnt"><option>2</option><option>3</option><option selected>4</option><option>5</option><option>6</option></select>
+      </label>
+      <label for="startCoins">Starting coins each<input id="startCoins" type="number" min="50" step="50" value="1000"></label>
+      <label for="boot">Boot (entry per round)<input id="boot" type="number" min="1" step="1" value="10"></label>
+      <label for="potLimit">Pot limit (0 = none)<input id="potLimit" type="number" min="0" step="10" value="1000"></label>
+    </div>
+    <div class="names">
+      <label for="n0">Player 1<input id="n0" value="Riya" maxlength="14"></label>
+      <label for="n1">Player 2<input id="n1" value="Arjun" maxlength="14"></label>
+      <label for="n2">Player 3<input id="n2" value="Meera" maxlength="14"></label>
+      <label for="n3">Player 4<input id="n3" value="Kabir" maxlength="14"></label>
+      <label for="n4">Player 5<input id="n4" value="Anaya" maxlength="14"></label>
+      <label for="n5">Player 6<input id="n5" value="Dev" maxlength="14"></label>
+    </div>
+    <div class="row">
+      <button class="gold" data-act="localStart">Deal first round</button>
+      <button data-act="localResume" id="resumeBtn" hidden>Continue last table</button>
+      <button class="ghost" data-act="home">Back</button>
+    </div>
+  </section>
+
+  <section class="panel" id="netMsg" hidden></section>
+  <section class="roombar" id="roomBar" hidden></section>
+
+  <section class="panel hl" id="seatBar" hidden>
+    <div class="joinrow">
+      <label for="sName">Your name<input id="sName" maxlength="14" placeholder="Your name"></label>
+      <button class="gold" data-act="sit">Take a seat</button>
+    </div>
+    <p class="why" id="seatNote"></p>
+  </section>
+
+  <section id="game" hidden></section>
+
+  <details class="rules">
+    <summary>Rules and hand rankings</summary>
+    <p>Everyone puts the boot in the pot and gets 3 cards face down. Going clockwise, each player bets or packs. The last player left, or the best hand at a show, takes the pot.</p>
+    <ol>
+      <li><b>Trail</b>: three of a kind (A-A-A is best)</li>
+      <li><b>Pure sequence</b>: three in a row, same suit</li>
+      <li><b>Sequence</b>: three in a row, mixed suits</li>
+      <li><b>Color</b>: same suit, not in a row</li>
+      <li><b>Pair</b>: two of the same rank</li>
+      <li><b>High card</b>: none of the above</li>
+    </ol>
+    <p>For sequences, A-K-Q is highest, A-2-3 is second, then K-Q-J and down to 2-3-4.</p>
+    <p><b>Blind</b> players haven't looked at their cards. They bet the current stake, or double it to raise. <b>Seen</b> players bet 2× the stake (chaal), or 4× to raise. Every raise doubles the stake.</p>
+    <p><b>Side show</b>: a seen player can pay a chaal to ask the previous seen player to compare cards privately. If they accept, the lower hand packs. On a tie, the player who asked packs.</p>
+    <p><b>Show</b>: when only two players are left, either can pay to show. Both hands are revealed and the best wins. On a tie, the player who asked loses. If the pot hits the pot limit, everyone still in shows.</p>
+    <p>Online, if someone stops responding for 90 seconds, anyone at the table can pack for them so the game keeps moving.</p>
+  </details>
+</div>
+
+<div class="ov" id="ov" hidden></div>
+<div class="toast" id="toast" hidden></div>
+
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script>
+(() => {
+// ================= cards & hands =================
+const SUITS = ['♠','♥','♦','♣'];
+const RL = {11:'J',12:'Q',13:'K',14:'A'};
+const rl = r => RL[r] || String(r);
+const RNAME = {2:'Twos',3:'Threes',4:'Fours',5:'Fives',6:'Sixes',7:'Sevens',8:'Eights',9:'Nines',10:'Tens',11:'Jacks',12:'Queens',13:'Kings',14:'Aces'};
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const AWAY_MS = 90000;
+const K = {local:'tp-local-v2', host:'tp-host-v1', pid:'tp-pid', name:'tp-name', room:'tp-room'};
+const store = {
+  get(k){ try { return localStorage.getItem(k); } catch(e){ return null; } },
+  set(k, v){ try { localStorage.setItem(k, v); } catch(e){} },
+  del(k){ try { localStorage.removeItem(k); } catch(e){} }
+};
+
+function randInt(n){ const a = new Uint32Array(1); crypto.getRandomValues(a); return a[0] % n; }
+function newDeck(){
+  const d = [];
+  for (const s of SUITS) for (let r = 2; r <= 14; r++) d.push({r, s});
+  for (let i = d.length - 1; i > 0; i--) { const j = randInt(i + 1); [d[i], d[j]] = [d[j], d[i]]; }
+  return d;
+}
+function evaluate(cards){
+  const r = cards.map(c => c.r).sort((a,b) => b - a);
+  const flush = cards.every(c => c.s === cards[0].s);
+  let seq = 0;
+  if (r[0]===14 && r[1]===13 && r[2]===12) seq = 100;
+  else if (r[0]===14 && r[1]===3 && r[2]===2) seq = 99;
+  else if (r[0]-r[1]===1 && r[1]-r[2]===1) seq = r[0];
+  const seqTxt = seq === 99 ? 'A-2-3' : r.map(rl).join('-');
+  if (r[0] === r[2]) return {cat:6, tb:[r[0]], name:'Trail of ' + RNAME[r[0]]};
+  if (seq && flush) return {cat:5, tb:[seq], name:'Pure sequence ' + seqTxt};
+  if (seq) return {cat:4, tb:[seq], name:'Sequence ' + seqTxt};
+  if (flush) return {cat:3, tb:r, name:'Color, ' + rl(r[0]) + ' high'};
+  if (r[0] === r[1] || r[1] === r[2]) { const p = r[1], k = r[0] === r[1] ? r[2] : r[0]; return {cat:2, tb:[p,k], name:'Pair of ' + RNAME[p]}; }
+  return {cat:1, tb:r, name:'High card ' + rl(r[0])};
+}
+function cmp(a, b){
+  if (a.cat !== b.cat) return a.cat - b.cat;
+  for (let i = 0; i < a.tb.length; i++) if (a.tb[i] !== b.tb[i]) return a.tb[i] - b.tb[i];
+  return 0;
+}
+
+// ================= game engine (pure state G) =================
+const live = s => s && s.inRound && !s.packed;
+const active = G => G.seats.filter(live);
+function nextActive(G, i){ const n = G.seats.length; for (let k = 1; k <= n; k++){ const j = (i + k) % n; if (live(G.seats[j])) return j; } return i; }
+function prevActive(G, i){ const n = G.seats.length; for (let k = 1; k <= n; k++){ const j = (i - k + n) % n; if (live(G.seats[j])) return j; } return i; }
+function costs(G, s){ const st = G.stake; return s.seen ? {bet:2*st, raise:4*st, show:2*st, side:2*st} : {bet:st, raise:2*st, show:st, side:Infinity}; }
+const maxStake = G => G.boot * 128;
+function canSide(G, i){ const s = G.seats[i]; if (!s.seen || active(G).length < 3) return false; const t = G.seats[prevActive(G, i)]; return t.seen && s.coins >= costs(G, s).side; }
+function glog(G, m){ G.log.unshift(m); G.log = G.log.slice(0, 8); }
+function pay(G, s, a){ s.coins -= a; G.pot += a; }
+function touch(G){ G.moveN = (G.moveN || 0) + 1; G.turnAt = Date.now(); }
+function newSeat(uid, name, coins){ return {uid, name, coins, cards:[], seen:false, packed:false, inRound:false}; }
+function newGame(cfg){
+  return {phase:'lobby', seats:[], boot:cfg.boot, potLimit:cfg.potLimit, startCoins:cfg.startCoins, dealer:-1, turn:0, pot:0, stake:cfg.boot,
+          roundNo:0, log:[], result:null, sideshow:null, lastSide:null, sideN:0, moveN:0, turnAt:Date.now()};
+}
+function startRound(G){
+  if (G.seats.filter(s => s.coins >= G.boot).length < 2) return 'At least two players need enough coins for the boot. Top someone up first.';
+  const deck = newDeck();
+  G.pot = 0; G.stake = G.boot; G.result = null; G.sideshow = null; G.roundNo++;
+  G.seats.forEach(s => { s.packed = false; s.seen = false; s.cards = []; s.inRound = s.coins >= G.boot; });
+  const n = G.seats.length; if (G.dealer >= n) G.dealer = n - 1;
+  for (let k = 1; k <= n; k++){ const j = (G.dealer + k + n) % n; if (G.seats[j].inRound){ G.dealer = j; break; } }
+  G.seats.forEach(s => { if (s.inRound) pay(G, s, G.boot); });
+  for (let c = 0; c < 3; c++) G.seats.forEach(s => { if (s.inRound) s.cards.push(deck.pop()); });
+  G.log = [];
+  glog(G, `Round ${G.roundNo}: ${G.seats[G.dealer].name} deals. Boot of ${G.boot} each.`);
+  G.turn = nextActive(G, G.dealer);
+  G.phase = 'play';
+  touch(G);
+  return null;
+}
+function advance(G){
+  if (G.potLimit > 0 && G.pot >= G.potLimit){ showdown(G, 'The pot reached the limit, so everyone still in showed.'); return; }
+  G.turn = nextActive(G, G.turn); G.phase = 'play'; touch(G);
+}
+function finish(G, winners, reason, revealIdx){
+  const share = Math.floor(G.pot / winners.length); let rem = G.pot - share * winners.length;
+  winners.forEach(i => { G.seats[i].coins += share + (rem > 0 ? 1 : 0); if (rem > 0) rem--; });
+  G.result = {
+    winners: winners.map(i => G.seats[i].uid), names: winners.map(i => G.seats[i].name), reason, pot: G.pot,
+    hands: revealIdx.map(i => ({uid:G.seats[i].uid, name:G.seats[i].name, cards:G.seats[i].cards, win:winners.includes(i)})),
+    winHand: revealIdx.length ? evaluate(G.seats[winners[0]].cards).name : ''
+  };
+  glog(G, `${winners.map(i => G.seats[i].name).join(' & ')} won ${G.pot}.`);
+  G.pot = 0; G.phase = 'roundEnd'; G.sideshow = null; touch(G);
+}
+function showdown(G, reason){
+  const idx = G.seats.map((s,i) => i).filter(i => live(G.seats[i]));
+  const ev = idx.map(i => evaluate(G.seats[i].cards));
+  let best = [idx[0]], bestEv = ev[0];
+  for (let k = 1; k < idx.length; k++){ const c = cmp(ev[k], bestEv); if (c > 0){ best = [idx[k]]; bestEv = ev[k]; } else if (c === 0) best.push(idx[k]); }
+  finish(G, best, reason, idx);
+}
+function sideAnswer(G, accept){
+  const ss = G.sideshow, A = G.seats[ss.from], B = G.seats[ss.to];
+  if (accept){
+    const r = cmp(evaluate(A.cards), evaluate(B.cards));
+    const loser = r > 0 ? ss.to : ss.from;
+    G.seats[loser].packed = true;
+    G.sideN = (G.sideN || 0) + 1;
+    G.lastSide = {id:G.sideN, round:G.roundNo,
+      a:{uid:A.uid, name:A.name, cards:A.cards}, b:{uid:B.uid, name:B.name, cards:B.cards}, loser:G.seats[loser].uid, loserName:G.seats[loser].name};
+    glog(G, `Side show: ${G.seats[loser].name} had the lower hand and packed.`);
+  } else glog(G, `${B.name} refused the side show.`);
+  G.sideshow = null; G.turn = ss.from; advance(G);
+}
+function act(G, i, a){
+  const s = G.seats[i];
+  if (!s) return 'Take a seat first.';
+  if (a === 'see'){
+    if (!live(s) || s.seen || !['play','sideAsk'].includes(G.phase)) return null;
+    s.seen = true; glog(G, `${s.name} looked at their cards.`); return null;
+  }
+  if (a === 'sideYes' || a === 'sideNo'){
+    if (G.phase !== 'sideAsk' || G.sideshow.to !== i) return 'That side show is already settled.';
+    sideAnswer(G, a === 'sideYes'); return null;
+  }
+  if (a === 'skip'){
+    if (Date.now() - G.turnAt < AWAY_MS) return 'Give them a little longer.';
+    if (G.phase === 'sideAsk'){ glog(G, `${G.seats[G.sideshow.to].name} didn't answer, so the side show was refused.`); sideAnswer(G, false); return null; }
+    if (G.phase !== 'play' || G.turn === i) return 'Nothing to skip.';
+    const t = G.seats[G.turn]; t.packed = true; glog(G, `${t.name} was away and got packed.`);
+    const left = active(G); if (left.length === 1){ finish(G, [G.seats.indexOf(left[0])], 'Everyone else packed.', []); return null; }
+    advance(G); return null;
+  }
+  if (G.phase !== 'play' || G.turn !== i) return "It isn't your turn.";
+  const c = costs(G, s);
+  if (a === 'pack'){
+    s.packed = true; glog(G, `${s.name} packed.`);
+    const left = active(G); if (left.length === 1){ finish(G, [G.seats.indexOf(left[0])], 'Everyone else packed.', []); return null; }
+    advance(G); return null;
+  }
+  if (a === 'bet' || a === 'raise'){
+    const amt = c[a]; if (s.coins < amt) return 'Not enough coins.';
+    if (a === 'raise' && G.stake * 2 > maxStake(G)) return 'The stake is already at the limit.';
+    pay(G, s, amt); if (a === 'raise') G.stake *= 2;
+    glog(G, `${s.name} ${s.seen ? (a==='raise' ? 'raised' : 'played chaal') : (a==='raise' ? 'raised blind' : 'played blind')} ${amt}.`);
+    advance(G); return null;
+  }
+  if (a === 'show'){
+    if (active(G).length !== 2 || s.coins < c.show) return 'Show needs exactly two players left.';
+    pay(G, s, c.show);
+    const oi = nextActive(G, i), o = G.seats[oi];
+    glog(G, `${s.name} paid ${c.show} for a show.`);
+    const r = cmp(evaluate(s.cards), evaluate(o.cards));
+    finish(G, [r > 0 ? i : oi], `${s.name} asked for a show${r === 0 ? ' and tied, so the asker loses' : ''}.`, [i, oi]);
+    return null;
+  }
+  if (a === 'side'){
+    if (!canSide(G, i)) return "A side show isn't possible right now.";
+    const ti = prevActive(G, i); pay(G, s, c.side);
+    glog(G, `${s.name} paid ${c.side} and asked ${G.seats[ti].name} for a side show.`);
+    G.sideshow = {from:i, to:ti}; G.phase = 'sideAsk'; touch(G); return null;
+  }
+  return 'Unknown move.';
+}
+// Table-level requests (joining, dealing, top-ups) plus moves. Returns new G or an error string.
+const MOVES = ['see','bet','raise','pack','show','side','sideYes','sideNo','skip'];
+function handle(G, pid, m){
+  const i = G.seats.findIndex(s => s.uid === pid);
+  const name = String(m.name || '').trim().slice(0, 14);
+  switch (m.a){
+    case 'join':
+      if (!name) return 'Enter your name first.';
+      if (i >= 0){ G.seats[i].name = name; return G; }
+      if (G.seats.length >= 6) return 'The table is full (6 players).';
+      G.seats.push(newSeat(pid, name, G.startCoins)); glog(G, `${name} sat down.`); return G;
+    case 'leave':
+      if (i < 0) return G;
+      if (!['lobby','roundEnd'].includes(G.phase)) return 'You can leave your seat between rounds.';
+      glog(G, `${G.seats[i].name} left the table.`); G.seats.splice(i, 1);
+      if (i <= G.dealer) G.dealer--;
+      return G;
+    case 'next':
+      if (i < 0) return 'Take a seat first.';
+      if (!['lobby','roundEnd'].includes(G.phase)) return 'A round is already in progress.';
+      return startRound(G) || G;
+    case 'topup': {
+      if (i < 0) return 'Take a seat first.';
+      const s = G.seats[Number(m.arg)]; if (!s) return 'That player left.';
+      s.coins += 500; glog(G, `${s.name} got 500 more coins.`); return G;
+    }
+    case 'reset':
+      if (i < 0) return 'Take a seat first.';
+      G.seats.forEach(s => { s.coins = G.startCoins; s.cards = []; s.packed = false; s.seen = false; s.inRound = false; });
+      Object.assign(G, {phase:'lobby', pot:0, stake:G.boot, roundNo:0, result:null, sideshow:null, lastSide:null, dealer:-1, log:[]});
+      glog(G, `New game: everyone is back to ${G.startCoins} coins.`); touch(G); return G;
+    default:
+      if (!MOVES.includes(m.a)) return 'Unknown request.';
+      if (i < 0) return 'Take a seat first.';
+      return act(G, i, m.a) || G;
+  }
+}
+window.__tp = {evaluate, cmp, newGame, newSeat, startRound, act, handle};
+
+// ================= device identity =================
+// One identity per browser tab (survives reloads), so two tabs or two devices are two players.
+let PID = null;
+try { PID = sessionStorage.getItem(K.pid); } catch(e){}
+if (!PID){ PID = 'p' + Math.random().toString(36).slice(2, 12); try { sessionStorage.setItem(K.pid, PID); } catch(e){} }
+
+// ================= view state =================
+// mode: home | hostSetup | joinSetup | local | host | client
+let G = null;    // what this device renders (host: its own redacted view; client: last view from host)
+let HG = null;   // host only: full authoritative state
+const V = {mode:'home', reveal:false, revealRound:-1, readyKey:-1, sideSeen:0, sidePeek:0, animRound:-1, net:'', netErr:'', code:''};
+const NET = {peer:null, conns:new Map(), hostConn:null, retry:null, wantName:''};
+let confirmReset = false;
+const online = () => V.mode === 'host' || V.mode === 'client';
+
+function toast(msg){ const t = $('toast'); t.textContent = msg; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => t.hidden = true, 3500); }
+const clone = o => JSON.parse(JSON.stringify(o));
+function mySeat(){
+  if (!G) return -1;
+  if (online()) return G.seats.findIndex(s => s.uid === PID);
+  if (G.phase === 'sideAsk') return G.sideshow.to;
+  return G.turn;
+}
+
+// ---------- local (pass and play) ----------
+function runLocal(fn){
+  const res = fn(clone(G));
+  if (typeof res === 'string'){ toast(res); return; }
+  G = res; store.set(K.local, JSON.stringify(G)); render();
+}
+
+// ---------- host ----------
+const peerId = code => 'tpatti-room-' + code.toLowerCase();
+function newCode(){ const A = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; let c = ''; for (let i = 0; i < 5; i++) c += A[randInt(A.length)]; return c; }
+function viewFor(pid){
+  const v = clone(HG);
+  v.seats.forEach(s => { if (s.uid !== pid) s.cards = s.cards.map(() => ({h:1})); });
+  if (v.lastSide && v.lastSide.a.uid !== pid && v.lastSide.b.uid !== pid){ v.lastSide.a.cards = []; v.lastSide.b.cards = []; }
+  v.online = [PID, ...NET.conns.keys()];
+  v.code = V.code;
+  return v;
+}
+function broadcast(){
+  store.set(K.host, JSON.stringify({code:V.code, g:HG, pid:PID}));
+  for (const [pid, c] of NET.conns) if (c.open) { try { c.send({t:'state', g:viewFor(pid)}); } catch(e){} }
+  G = viewFor(PID); render();
+}
+function hostApply(pid, m){
+  const res = handle(clone(HG), pid, m);
+  if (typeof res === 'string') return res;
+  HG = res; broadcast(); return null;
+}
+function startHosting(){
+  if (!window.Peer){ V.netErr = "The connection library didn't load. Check your internet connection and reload."; render(); return; }
+  if (NET.peer) try { NET.peer.destroy(); } catch(e){}
+  V.net = 'Opening the room…'; V.netErr = ''; render();
+  const peer = new Peer(peerId(V.code));
+  NET.peer = peer;
+  peer.on('open', () => { V.net = ''; render(); });
+  peer.on('connection', conn => {
+    conn.on('data', m => {
+      if (!m || typeof m !== 'object') return;
+      if (m.t === 'hello'){
+        const pid = String(m.pid || '').slice(0, 40); if (!pid || pid === PID) return;
+        const old = NET.conns.get(pid); if (old && old !== conn) try { old.close(); } catch(e){}
+        conn.pid = pid; NET.conns.set(pid, conn);
+        if (m.name){ const e = hostApply(pid, {a:'join', name:m.name}); if (e) conn.send({t:'err', msg:e}); }
+        broadcast(); return;
+      }
+      if (m.t === 'req' && conn.pid){
+        const e = hostApply(conn.pid, {a:String(m.a || ''), arg:m.arg, name:m.name});
+        if (e) conn.send({t:'err', msg:e});
+      }
+    });
+    conn.on('close', () => { if (NET.conns.get(conn.pid) === conn){ NET.conns.delete(conn.pid); broadcast(); } });
+  });
+  peer.on('disconnected', () => { V.net = 'Reconnecting to the internet…'; render(); try { peer.reconnect(); } catch(e){} });
+  peer.on('error', err => {
+    if (err.type === 'unavailable-id'){ V.net = 'Reopening your room. This can take up to a minute after a reload…'; render(); clearTimeout(NET.retry); NET.retry = setTimeout(startHosting, 5000); }
+    else if (['network','server-error','socket-error','socket-closed'].includes(err.type)){ V.net = "Can't reach the connection service. Retrying…"; render(); clearTimeout(NET.retry); NET.retry = setTimeout(startHosting, 5000); }
+  });
+}
+
+// ---------- client ----------
+function connectClient(){
+  if (!window.Peer){ V.netErr = "The connection library didn't load. Check your internet connection and reload."; render(); return; }
+  if (NET.peer) try { NET.peer.destroy(); } catch(e){}
+  V.net = `Connecting to room ${V.code}…`; V.netErr = ''; render();
+  const peer = new Peer();
+  NET.peer = peer;
+  peer.on('open', () => {
+    const conn = peer.connect(peerId(V.code), {reliable:true});
+    NET.hostConn = conn;
+    const timer = setTimeout(() => { if (!G){ V.net = ''; V.netErr = `No answer from room ${V.code}. Check the code, and make sure the host still has the page open.`; render(); } }, 12000);
+    conn.on('open', () => { conn.send({t:'hello', pid:PID, name:NET.wantName}); });
+    conn.on('data', m => {
+      if (!m || typeof m !== 'object') return;
+      if (m.t === 'state'){ clearTimeout(timer); G = m.g; V.net = ''; V.netErr = ''; render(); }
+      else if (m.t === 'err') toast(String(m.msg));
+    });
+    conn.on('close', () => {
+      if (V.mode !== 'client' || NET.hostConn !== conn) return;
+      V.net = 'Lost the connection to the host. Reconnecting…'; render();
+      clearTimeout(NET.retry); NET.retry = setTimeout(connectClient, 3000);
+    });
+  });
+  peer.on('error', err => {
+    if (V.mode !== 'client') return;
+    if (err.type === 'peer-unavailable'){
+      if (G){ V.net = 'The host went offline. Waiting for them to come back…'; render(); clearTimeout(NET.retry); NET.retry = setTimeout(connectClient, 5000); }
+      else { V.net = ''; V.netErr = `There's no open room with the code ${V.code}. Check the code, and make sure the host still has the page open.`; render(); }
+    } else { V.net = "Can't reach the connection service. Retrying…"; render(); clearTimeout(NET.retry); NET.retry = setTimeout(connectClient, 5000); }
+  });
+}
+
+// ---------- one entry point for every request ----------
+function request(m){
+  if (V.mode === 'local'){
+    runLocal(x => { const i = x.phase === 'sideAsk' ? x.sideshow.to : x.turn; return MOVES.includes(m.a) ? (act(x, i, m.a) || x) : handle(x, x.seats[i].uid, m); });
+    return;
+  }
+  if (V.mode === 'host'){ const e = hostApply(PID, m); if (e) toast(e); return; }
+  if (V.mode === 'client'){
+    const c = NET.hostConn;
+    if (!c || !c.open){ toast('Not connected to the host right now.'); return; }
+    c.send({t:'req', a:m.a, arg:m.arg, name:m.name});
+  }
+}
+
+function leaveNet(){
+  clearTimeout(NET.retry);
+  if (NET.peer) try { NET.peer.destroy(); } catch(e){}
+  NET.peer = null; NET.hostConn = null; NET.conns.clear();
+}
+
+setInterval(() => { if (online() && G && ['play','sideAsk'].includes(G.phase)) render(); }, 5000);
+
+// ================= rendering =================
+function cardHTML(c, up, size='', deal=false, i=0){
+  const cls = `card ${size} ${deal ? 'deal' : ''}`;
+  const st = deal ? ` style="animation-delay:${i*70}ms"` : '';
+  if (!up || !c || !c.r) return `<div class="${cls} back"${st} aria-label="face-down card"></div>`;
+  const red = c.s === '♥' || c.s === '♦';
+  return `<div class="${cls} ${red ? 'red' : ''}"${st} aria-label="${rl(c.r)} of ${c.s}"><span class="c-r">${rl(c.r)}</span><span class="c-s">${c.s}</span><span class="c-r2">${rl(c.r)}</span></div>`;
+}
+const coins = n => `<span class="num"><span class="coin"></span>${Number(n).toLocaleString()}</span>`;
+
+function seatHTML(s, i){
+  const me = online() && s.uid === PID;
+  const res = G.result;
+  const shown = G.phase === 'roundEnd' && res && res.hands.find(h => h.uid === s.uid);
+  const isCur = (G.phase === 'play' && i === G.turn) || (G.phase === 'sideAsk' && i === G.sideshow.to);
+  const isWin = G.phase === 'roundEnd' && res && res.winners.includes(s.uid);
+  const off = online() && G.online && !G.online.includes(s.uid);
+  const pills = [];
+  if (me) pills.push('<span class="pill you">You</span>');
+  if (off) pills.push('<span class="pill off">Offline</span>');
+  if (i === G.dealer && G.phase !== 'lobby') pills.push('<span class="pill dealer">Dealer</span>');
+  if (G.phase === 'lobby') pills.push('<span class="pill">Ready</span>');
+  else if (!s.inRound) pills.push('<span class="pill">Next round</span>');
+  else if (s.packed) pills.push('<span class="pill packed">Packed</span>');
+  else pills.push(s.seen ? '<span class="pill seen">Seen</span>' : '<span class="pill blind">Blind</span>');
+  const cards = shown ? shown.cards : s.cards;
+  const cardRow = s.inRound && G.phase !== 'lobby' ? `<div class="mini">${cards.map(c => cardHTML(c, !!shown, 'sm')).join('')}</div>` : '';
+  return `<div class="seat ${isCur ? 'cur' : ''} ${s.packed && G.phase !== 'lobby' ? 'packed' : ''} ${!s.inRound && G.phase !== 'lobby' ? 'out' : ''} ${isWin ? 'win' : ''}">
+    <div class="sr"><span class="nm">${esc(s.name)}</span>${coins(s.coins)}</div>
+    <div class="pills">${pills.join('')}</div>${cardRow}${shown ? `<div class="why">${esc(evaluate(shown.cards).name)}</div>` : ''}</div>`;
+}
+
+function dockHTML(){
+  const i = mySeat();
+  if (i < 0 || !['play','sideAsk'].includes(G.phase)) return '';
+  if (V.mode === 'local' && !(G.phase === 'play' && V.readyKey === G.moveN)) return '';
+  const s = G.seats[i];
+  if (!s.inRound) return `<section class="dock"><p class="muted">You'll be dealt in next round.</p></section>`;
+  if (online() && V.revealRound !== G.roundNo){ V.reveal = false; V.revealRound = G.roundNo; }
+  const myTurn = G.phase === 'play' && G.turn === i;
+  const c = costs(G, s);
+  const two = active(G).length === 2;
+  const up = s.seen && V.reveal;
+  const deal = V.animRound !== G.roundNo; V.animRound = G.roundNo;
+  const btn = (a, label, amt, ok, extra='') => `<button data-act="${a}" ${ok && myTurn ? '' : 'disabled'} class="${extra}">${label}${amt != null ? `<small>${amt.toLocaleString()} coins</small>` : ''}</button>`;
+  const canRaise = G.stake * 2 <= maxStake(G);
+  let buttons = btn('pack', 'Pack', null, true, 'danger');
+  if (!s.seen){
+    buttons += btn('bet', 'Blind', c.bet, s.coins >= c.bet, 'gold');
+    buttons += btn('raise', 'Blind ×2', c.raise, s.coins >= c.raise && canRaise);
+  } else {
+    buttons += btn('bet', 'Chaal', c.bet, s.coins >= c.bet, 'gold');
+    buttons += btn('raise', 'Raise', c.raise, s.coins >= c.raise && canRaise);
+    if (!two && live(s)) buttons += btn('side', `Side show with ${esc(G.seats[prevActive(G, i)].name)}`, c.side, canSide(G, i));
+  }
+  if (two) buttons += btn('show', 'Show', c.show, s.coins >= c.show);
+  let hint = '';
+  if (s.packed) hint = 'You packed. Wait for the next round.';
+  else if (!myTurn && G.phase === 'play') hint = `Waiting for ${esc(G.seats[G.turn].name)}.`;
+  else if (myTurn && s.coins < c.bet) hint = `Not enough coins to stay in. You can pack${two && s.coins >= c.show ? ' or show' : ''}.`;
+  else if (myTurn && s.seen && !two && !G.seats[prevActive(G, i)].seen) hint = `Side show needs ${esc(G.seats[prevActive(G, i)].name)} to have seen their cards.`;
+  const ev = up && s.cards[0] && s.cards[0].r ? evaluate(s.cards) : null;
+  const title = V.mode === 'local' ? `${esc(s.name)}'s turn` : (myTurn ? 'Your turn' : 'Your hand');
+  return `<section class="dock" aria-label="Your hand">
+    <div class="who"><h2>${title}</h2><span class="muted">${s.packed ? 'Packed' : s.seen ? 'Seen' : 'Playing blind'} · ${coins(s.coins)}</span></div>
+    <div class="hand">${s.cards.map((cd,k) => cardHTML(cd, up, 'lg', deal, k)).join('')}
+      <div style="display:flex;flex-direction:column;gap:8px">
+        ${s.seen ? `<button data-act="toggle">${V.reveal ? 'Hide my cards' : 'Show my cards'}</button>` : (live(s) ? `<button data-act="see">See cards</button>` : '')}
+        ${ev ? `<span class="handname">${esc(ev.name)}</span>` : (s.seen || s.packed ? '' : '<span class="why">Blind players bet half as much.</span>')}
+      </div>
+    </div>
+    ${s.packed ? '' : `<div class="acts">${buttons}</div>`}
+    ${hint ? `<div class="why">${hint}</div>` : ''}
+  </section>`;
+}
+
+function statusHTML(){
+  if (!online()) return '';
+  const i = mySeat();
+  const away = i >= 0 && Date.now() - (G.turnAt || 0) > AWAY_MS;
+  if (G.phase === 'play'){
+    const t = G.seats[G.turn];
+    if (G.turn === i) return `<div class="status" style="color:var(--gold)">It's your turn</div>`;
+    return `<div class="status"><span>Waiting for ${esc(t.name)}…</span>${away ? `<button data-act="skip">Pack for ${esc(t.name)} (away)</button>` : ''}</div>`;
+  }
+  if (G.phase === 'sideAsk'){
+    const ss = G.sideshow;
+    return `<div class="status"><span>${esc(G.seats[ss.from].name)} asked ${esc(G.seats[ss.to].name)} for a side show. Waiting for an answer…</span>${away && ss.to !== i ? `<button data-act="skip">Refuse for ${esc(G.seats[ss.to].name)} (away)</button>` : ''}</div>`;
+  }
+  return '';
+}
+
+function lobbyHTML(){
+  const i = mySeat(), n = G.seats.length;
+  return `<section class="panel hl result">
+    <h2>Waiting for players</h2>
+    <p class="muted">${n} of 6 seated. Send the room code or link to everyone. You need at least 2 players to start.</p>
+    <p class="muted">Boot ${G.boot} · starting coins ${G.startCoins.toLocaleString()}${G.potLimit ? ' · pot limit ' + G.potLimit.toLocaleString() : ''}</p>
+    <div class="btns">${i >= 0 ? `<button class="gold" data-act="next" ${n >= 2 ? '' : 'disabled'}>Deal first round</button>${V.mode === 'client' ? '<button data-act="leaveSeat">Leave seat</button>' : ''}` : ''}</div>
+  </section>`;
+}
+
+function resultHTML(){
+  const r = G.result; if (!r) return '';
+  const i = mySeat();
+  const canAct = V.mode === 'local' || i >= 0;
+  const shown = r.hands.length ? `<div class="cmp">${r.hands.map(h => `<div class="side ${h.win ? 'win' : ''}"><b>${esc(h.name)}</b><div class="mini">${h.cards.map(c => cardHTML(c, true, 'sm')).join('')}</div><span class="why">${esc(evaluate(h.cards).name)}</span></div>`).join('')}</div>` : '';
+  const bal = G.seats.map((P,k) => `<div class="r"><span>${esc(P.name)}${online() && P.uid === PID ? ' (you)' : ''}</span><span class="row">${coins(P.coins)}${canAct ? `<button data-act="topup" data-arg="${k}" title="Add 500 pretend coins">+500</button>` : ''}</span></div>`).join('');
+  const canNext = G.seats.filter(P => P.coins >= G.boot).length >= 2;
+  return `<section class="panel hl result">
+    <div class="muted">Round ${G.roundNo}</div>
+    <div class="big">${esc(r.names.join(' & '))} ${r.winners.length > 1 ? 'split' : 'wins'} ${coins(r.pot)}</div>
+    ${r.winHand ? `<div class="handname">${esc(r.winHand)}</div>` : ''}
+    <p class="muted">${esc(r.reason)}</p>
+    ${shown}
+    <div class="bal">${bal}</div>
+    <div class="btns">${canAct ? `<button class="gold" data-act="next" ${canNext ? '' : 'disabled'}>Deal next round</button>` : ''}
+      ${V.mode === 'client' && i >= 0 ? '<button data-act="leaveSeat">Leave seat</button>' : ''}</div>
+    ${canNext ? '' : '<p class="why">Fewer than two players can pay the boot. Use +500 to top someone up.</p>'}
+  </section>`;
+}
+
+function overlayHTML(){
+  const ls = G.lastSide;
+  if (ls && ls.id !== V.sideSeen && ls.round === G.roundNo){
+    const involved = V.mode === 'local' || ls.a.uid === PID || ls.b.uid === PID;
+    if (involved && ls.a.cards.length){
+      if (V.mode === 'local' && V.sidePeek !== ls.id)
+        return `<div class="box"><div class="big">Side show</div><p>Only ${esc(ls.a.name)} and ${esc(ls.b.name)} should look at the screen now.</p><div class="btns"><button class="gold" data-act="sidePeek">Reveal both hands</button></div></div>`;
+      const side = h => `<div class="side ${ls.loser !== h.uid ? 'win' : ''}"><b>${esc(h.name)}</b><div class="mini">${h.cards.map(c => cardHTML(c, true)).join('')}</div><span class="why">${esc(evaluate(h.cards).name)}</span></div>`;
+      return `<div class="box"><div class="muted">Side show</div><div class="big">${esc(ls.loserName)} packs</div><div class="cmp">${side(ls.a)}${side(ls.b)}</div>
+        <div class="btns"><button class="gold" data-act="sideDone">Hide cards and continue</button></div></div>`;
+    }
+  }
+  if (G.phase === 'sideAsk'){
+    const ss = G.sideshow, A = G.seats[ss.from], B = G.seats[ss.to];
+    if (V.mode === 'local' || B.uid === PID) return `<div class="box">${V.mode === 'local' ? `<div class="muted">Pass the device to</div><div class="big">${esc(B.name)}</div>` : '<div class="big">Side show?</div>'}
+      <p>${esc(A.name)} wants a side show with you. If you accept, you both see each other's cards and the lower hand packs. On a tie, ${esc(A.name)} packs.</p>
+      <div class="btns"><button class="gold" data-act="sideYes">Accept</button><button data-act="sideNo">Refuse</button></div></div>`;
+  }
+  if (V.mode === 'local' && G.phase === 'play' && V.readyKey !== G.moveN){
+    const p = G.seats[G.turn];
+    return `<div class="box"><div class="muted">Pass the device to</div><div class="big">${esc(p.name)}</div>
+      <div class="muted">Pot ${coins(G.pot)} · stake ${G.stake}</div>
+      <div class="btns"><button class="gold" data-act="ready">I'm ${esc(p.name)}, start my turn</button></div></div>`;
+  }
+  return '';
+}
+
+const shareLink = () => location.origin + location.pathname + '?room=' + V.code;
+function roomBarHTML(){
+  const n = G && G.online ? G.online.length : 1;
+  return `<div><div class="muted" style="font-size:.8rem;letter-spacing:.1em;text-transform:uppercase">Room code</div><div class="code">${esc(V.code)}</div></div>
+    <div class="muted"><span class="dot ${V.net ? 'off' : ''}"></span>${V.net ? esc(V.net) : `${n} connected${V.mode === 'host' ? ' · keep this page open' : ''}`}</div>
+    <button data-act="copyLink">Copy invite link</button>`;
+}
+
+function show(id, on){ $(id).hidden = !on; }
+function render(){
+  const m = V.mode;
+  show('home', m === 'home');
+  const saved = store.get(K.host);
+  show('resumeRow', m === 'home' && !!saved);
+  if (saved && m === 'home'){ try { $('resumeHostBtn').textContent = 'Resume hosting room ' + JSON.parse(saved).code; } catch(e){} }
+  show('hostSetup', m === 'hostSetup');
+  show('joinSetup', m === 'joinSetup');
+  show('localSetup', m === 'local' && !G);
+  show('toprow', ['local','host','client'].includes(m));
+  $('homeBtn').textContent = m === 'local' ? 'Switch mode' : 'Leave room';
+  $('resetBtn').hidden = !G || (online() && mySeat() < 0);
+  if (m === 'local' && !G){ $('resumeBtn').hidden = !store.get(K.local); syncNames(); }
+
+  let msg = '';
+  if (online() && V.netErr) msg = `<p>${esc(V.netErr)}</p><div class="row"><button class="gold" data-act="retry">Try again</button><button class="ghost" data-act="home">Back</button></div>`;
+  else if (V.mode === 'client' && !G) msg = `<p class="muted">${esc(V.net || 'Connecting…')}</p>`;
+  $('netMsg').innerHTML = msg; show('netMsg', !!msg);
+
+  const showRoom = online() && G && !V.netErr;
+  show('roomBar', showRoom);
+  if (showRoom) $('roomBar').innerHTML = roomBarHTML();
+
+  const canSit = online() && G && !V.netErr && mySeat() < 0 && G.seats.length < 6;
+  show('seatBar', canSit);
+  if (canSit) $('seatNote').textContent = G.phase === 'lobby' ? 'The game starts when someone seated taps Deal.' : "A round is in progress. You'll be dealt in next round.";
+
+  const showGame = !!G && !(online() && V.netErr);
+  show('game', showGame);
+  if (!showGame){ $('ov').hidden = true; $('sub').textContent = 'Pretend coins only · no sign-up'; return; }
+
+  $('sub').textContent = `${m === 'local' ? 'Pass and play' : 'Online'} · ${G.phase === 'lobby' ? 'lobby' : 'round ' + G.roundNo} · boot ${G.boot}${G.potLimit ? ' · pot limit ' + G.potLimit.toLocaleString() : ''}`;
+  $('game').innerHTML = `<div style="display:flex;flex-direction:column;gap:16px">
+    ${G.phase === 'lobby' ? lobbyHTML() : ''}
+    ${G.phase === 'roundEnd' ? resultHTML() : ''}
+    ${G.phase !== 'lobby' ? `<div class="pot"><span class="lbl">Pot</span><span class="amt num">${G.pot.toLocaleString()}</span><span class="meta">Stake ${G.stake} · blind bets ${G.stake}, seen bets ${G.stake*2}</span></div>` : ''}
+    ${statusHTML()}
+    <div class="seats">${G.seats.map(seatHTML).join('')}</div>
+    ${dockHTML()}
+    <ul class="log" aria-live="polite">${G.log.map(l => `<li>${esc(l)}</li>`).join('')}</ul>
+  </div>`;
+  const ov = overlayHTML();
+  $('ov').innerHTML = ov; $('ov').hidden = !ov;
+}
+function syncNames(){ const n = +$('cnt').value; for (let i = 0; i < 6; i++) $('n'+i).parentElement.hidden = i >= n; }
+const intVal = (id, d, min) => Math.max(min, Math.floor(+$(id).value || d));
+function setUrlRoom(code){ try { const u = new URL(location.href); if (code) u.searchParams.set('room', code); else u.searchParams.delete('room'); history.replaceState(null, '', u); } catch(e){} }
+
+// ================= actions =================
+function onAct(a, arg){
+  switch (a){
+    case 'home':
+      leaveNet(); G = null; HG = null; V.net = ''; V.netErr = ''; V.mode = 'home'; setUrlRoom(''); render(); return;
+    case 'goHost': V.mode = 'hostSetup'; render(); $('hName').focus(); return;
+    case 'goJoin': V.mode = 'joinSetup'; render(); ($('jName').value ? $('jCode') : $('jName')).focus(); return;
+    case 'goLocal': V.mode = 'local'; G = null; render(); return;
+    case 'createRoom': {
+      const name = $('hName').value.trim().slice(0, 14);
+      if (!name){ toast('Enter your name first.'); $('hName').focus(); return; }
+      store.set(K.name, name);
+      const cfg = {startCoins:intVal('hCoins', 1000, 10), boot:intVal('hBoot', 10, 1), potLimit:Math.max(0, Math.floor(+$('hLimit').value || 0))};
+      V.code = newCode();
+      HG = newGame(cfg); HG.seats.push(newSeat(PID, name, cfg.startCoins)); glog(HG, `${name} opened room ${V.code}.`);
+      V.mode = 'host'; setUrlRoom(V.code); broadcast(); startHosting(); return;
+    }
+    case 'resumeHost': {
+      try { const s = JSON.parse(store.get(K.host)); V.code = s.code; HG = s.g; if (s.pid){ PID = s.pid; try { sessionStorage.setItem(K.pid, PID); } catch(e){} } } catch(e){ toast("That room couldn't be restored."); return; }
+      V.mode = 'host'; setUrlRoom(V.code); broadcast(); startHosting(); return;
+    }
+    case 'joinRoom': {
+      const name = $('jName').value.trim().slice(0, 14);
+      const code = $('jCode').value.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+      if (!name){ toast('Enter your name first.'); $('jName').focus(); return; }
+      if (code.length < 4){ toast('Enter the room code.'); $('jCode').focus(); return; }
+      store.set(K.name, name); store.set(K.room, code);
+      V.code = code; NET.wantName = name; G = null; V.mode = 'client'; setUrlRoom(code); connectClient(); return;
+    }
+    case 'retry': V.netErr = ''; if (V.mode === 'host') startHosting(); else connectClient(); return;
+    case 'copyLink': {
+      const link = shareLink();
+      const done = () => toast('Invite link copied.');
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(link).then(done, () => toast(link));
+      else toast(link);
+      return;
+    }
+    case 'sit': {
+      const name = $('sName').value.trim().slice(0, 14);
+      if (!name){ toast('Enter your name first.'); $('sName').focus(); return; }
+      store.set(K.name, name); request({a:'join', name}); return;
+    }
+    case 'leaveSeat': request({a:'leave'}); return;
+    case 'localStart': {
+      const n = +$('cnt').value, each = intVal('startCoins', 1000, 10);
+      const g = newGame({boot:intVal('boot', 10, 1), potLimit:Math.max(0, Math.floor(+$('potLimit').value || 0)), startCoins:each});
+      for (let i = 0; i < n; i++) g.seats.push(newSeat('L' + i, ($('n'+i).value.trim() || 'Player ' + (i+1)).slice(0, 14), each));
+      G = g; runLocal(x => startRound(x) || x); return;
+    }
+    case 'localResume': try { G = JSON.parse(store.get(K.local)); } catch(e){ G = null; } render(); return;
+    case 'ready': V.readyKey = G.moveN; V.reveal = false; render(); return;
+    case 'toggle': V.reveal = !V.reveal; render(); return;
+    case 'see': V.reveal = true; V.revealRound = G.roundNo; request({a:'see'}); return;
+    case 'sidePeek': V.sidePeek = G.lastSide.id; render(); return;
+    case 'sideDone': V.sideSeen = G.lastSide.id; render(); return;
+    case 'next': case 'pack': case 'bet': case 'raise': case 'show': case 'side': case 'sideYes': case 'sideNo': case 'skip':
+      request({a}); return;
+    case 'topup': request({a:'topup', arg:+arg}); return;
+    case 'reset':
+      if (!confirmReset){ confirmReset = true; $('resetBtn').textContent = 'Tap again to restart'; setTimeout(() => { confirmReset = false; $('resetBtn').textContent = 'New game'; }, 3000); return; }
+      confirmReset = false; $('resetBtn').textContent = 'New game';
+      if (V.mode === 'local'){ G = null; store.del(K.local); render(); return; }
+      request({a:'reset'}); return;
+  }
+}
+
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-act]');
+  if (!b || b.disabled) return;
+  onAct(b.dataset.act, b.dataset.arg);
+});
+$('cnt').addEventListener('change', syncNames);
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Enter') return;
+  if (['jName','jCode'].includes(e.target.id)) onAct('joinRoom');
+  else if (e.target.id === 'hName') onAct('createRoom');
+  else if (e.target.id === 'sName') onAct('sit');
+});
+
+// prefill from last visit and invite links
+const savedName = store.get(K.name) || '';
+['hName','jName','sName'].forEach(id => $(id).value = savedName);
+const urlRoom = new URLSearchParams(location.search).get('room');
+if (urlRoom){
+  $('jCode').value = urlRoom.toUpperCase();
+  let hosting = null; try { hosting = JSON.parse(store.get(K.host) || 'null'); } catch(e){}
+  // Only the host's own tab (same identity, e.g. after a reload) resumes hosting; any other tab joins.
+  if (hosting && hosting.code === urlRoom.toUpperCase() && hosting.pid === PID) onAct('resumeHost');
+  else { V.mode = 'joinSetup'; render(); }
+} else render();
+})();
+</script>
+</body>
+</html>

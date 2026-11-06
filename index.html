@@ -397,7 +397,7 @@ function act(G, i, a){
   }
   return 'Unknown move.';
 }
-// Table-level requests (joining, dealing, top-ups) plus moves. Returns new G or an error string.
+// Table-level requests (joining, dealing) plus moves. Returns new G or an error string.
 const MOVES = ['see','bet','raise','pack','show','side','sideYes','sideNo','skip'];
 function handle(G, pid, m){
   const i = G.seats.findIndex(s => s.uid === pid);
@@ -427,11 +427,6 @@ function handle(G, pid, m){
       const k = G.seats.map(x => !!x.bot).lastIndexOf(true); if (k < 0) return G;
       glog(G, `${G.seats[k].name} (computer) left.`); G.seats.splice(k, 1); if (k <= G.dealer) G.dealer--;
       return G;
-    }
-    case 'topup': {
-      if (i < 0) return 'Take a seat first.';
-      const s = G.seats[Number(m.arg)]; if (!s) return 'That player left.';
-      s.coins += 500; glog(G, `${s.name} got 500 more coins.`); return G;
     }
     case 'reset':
       if (i < 0) return 'Take a seat first.';
@@ -885,7 +880,7 @@ function resultHTML(){
   const i = mySeat();
   const canAct = V.mode === 'local' || i >= 0;
   const shown = r.hands.length ? `<div class="cmp">${r.hands.map(h => `<div class="side ${h.win ? 'win' : ''}"><b>${esc(h.name)}</b><div class="mini">${h.cards.map(c => cardHTML(c, true, 'sm')).join('')}</div><span class="why">${esc(evaluate(h.cards).name)}</span></div>`).join('')}</div>` : '';
-  const bal = G.seats.map((P,k) => `<div class="r"><span>${esc(P.name)}${online() && P.uid === PID ? ' (you)' : ''}</span><span class="row">${coins(P.coins)}${canAct ? `<button data-act="topup" data-arg="${k}" title="Add 500 pretend coins">+500</button>` : ''}</span></div>`).join('');
+  const bal = G.seats.map((P,k) => `<div class="r"><span>${esc(P.name)}${online() && P.uid === PID ? ' (you)' : ''}</span><span class="row">${coins(P.coins)}</span></div>`).join('');
   const canNext = G.seats.filter(P => P.coins >= G.boot).length >= 2;
   return `<section class="panel hl result">
     <div class="muted">Round ${G.roundNo}</div>
@@ -896,7 +891,7 @@ function resultHTML(){
     <div class="bal">${bal}</div>
     <div class="btns">${canAct ? `<button class="gold" data-act="next" ${canNext ? '' : 'disabled'}>Deal next round</button>` : ''}
       ${V.mode === 'client' && i >= 0 ? '<button data-act="leaveSeat">Leave seat</button>' : ''}</div>
-    ${canNext ? '' : '<p class="why">Fewer than two players can pay the boot. Use +500 to top someone up.</p>'}
+    ${canNext ? '' : '<p class="why">Fewer than two players can pay the boot. Tap New game at the top to give everyone their starting coins again.</p>'}
     ${botControls()}
   </section>`;
 }
@@ -1054,7 +1049,6 @@ function onAct(a, arg){
     case 'sideDone': V.sideSeen = G.lastSide.id; render(); return;
     case 'next': case 'pack': case 'bet': case 'raise': case 'show': case 'side': case 'sideYes': case 'sideNo': case 'skip':
       request({a}); return;
-    case 'topup': request({a:'topup', arg:+arg}); return;
     case 'reset':
       if (!confirmReset){ confirmReset = true; $('resetBtn').textContent = 'Tap again to restart'; setTimeout(() => { confirmReset = false; $('resetBtn').textContent = 'New game'; }, 3000); return; }
       confirmReset = false; $('resetBtn').textContent = 'New game';

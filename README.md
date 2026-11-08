@@ -10,6 +10,8 @@ Teen Patti for family and friends, played with pretend coins. No sign-up needed.
 - **Play with computer**: play against 1–5 computer players on your own device. The host can also add or remove computer players between rounds, and friends can still join with the room code.
 - **Voice chat**: in a room, tap *Join voice chat* to talk while you play. You can mute or leave voice at any time. A player's seat glows green while they're talking.
 - **Pass and play**: one device passed around. Works offline.
+- **Turn timer**: the host picks 15–60 seconds per turn, or no timer. A ring around the player's seat counts down. If it runs out, they pack automatically.
+- **End of round**: everyone's cards are shown, packed hands included. Coins fly into the pot with each bet and to the winner at the end.
 
 Devices connect to each other directly (WebRTC via [PeerJS](https://peerjs.com)), using PeerJS's free public server only to find each other.
 Each player only receives their own cards from the host. The host's browser holds the full deck, so it's built for friendly games, not for real money.

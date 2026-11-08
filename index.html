@@ -66,22 +66,86 @@ input,select{font:inherit;color:var(--fg);background:var(--bg);border:1px solid 
 .pot .lbl{font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
 .pot .meta{font-size:.88rem;color:var(--muted)}
 .status{text-align:center;font-weight:600;display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap}
-.seats{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
-.seat{background:var(--felt);border:1px solid var(--line);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:8px;min-width:0}
-.seat.cur{border-color:var(--gold);box-shadow:0 0 0 2px #f2b43c55,0 8px 24px #0006}
-.seat.packed,.seat.out{opacity:.55}
-.seat.win{border-color:var(--ok);box-shadow:0 0 0 2px #52c48d66}
-.seat .nm{font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
-.seat .sr{display:flex;justify-content:space-between;align-items:center;gap:6px}
-.pills{display:flex;gap:4px;flex-wrap:wrap}
-.pill{font-size:.68rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
-.pill.blind{color:#c8b8ff;border-color:#5b4bb0}
-.pill.seen{color:var(--gold);border-color:var(--gold-deep)}
-.pill.packed,.pill.off{color:#e7889a;border-color:#6b2a3c}
-.pill.dealer{background:var(--fg);color:var(--ink);border-color:var(--fg)}
-.pill.you{color:var(--ok);border-color:#2f7a57}
-.pill.mic{color:var(--ok);border-color:#2f7a57}
-.seat.talking{border-color:var(--ok);box-shadow:0 0 0 3px #52c48d88,0 0 18px #52c48d55}
+/* ---- round table ---- */
+.tablewrap{padding:58px 6px 92px}
+.table{position:relative;width:100%;aspect-ratio:2.1/1;margin:0 auto}
+.felt{position:absolute;inset:2% 3%;border-radius:999px;background:radial-gradient(ellipse at 50% 38%,#2c8a68 0%,#1d6a50 52%,#124535 100%);
+  box-shadow:inset 0 0 0 9px #5a3420,inset 0 0 0 12px #c08a3e,inset 0 0 0 15px #3e2214,inset 0 0 46px #000a,0 22px 50px #000b}
+.felt::after{content:"";position:absolute;inset:13% 15%;border-radius:999px;border:1.5px solid #ffffff1c}
+.center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:1px;text-align:center;z-index:1;width:44%;pointer-events:none}
+.center .clbl{font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;color:#d7f3e6b0}
+.center .camt{font-family:var(--display);font-size:2rem;color:var(--gold);line-height:1.05;text-shadow:0 2px 6px #0008}
+.center .cmeta{font-size:.82rem;color:#e2f5ec;opacity:.85}
+.center .cstat{font-size:.85rem;font-weight:700;margin-top:3px;background:#0007;border-radius:999px;padding:2px 10px;pointer-events:auto}
+.cd{font-variant-numeric:tabular-nums;color:var(--ok);font-weight:800}
+.cd.low{color:#ff6b6b}
+.pile{position:relative;width:76px;height:28px;margin-bottom:2px}
+.chip,.fchip{border-radius:50%;background:radial-gradient(circle,var(--c) 0 38%,#ffffffd9 39% 48%,var(--c) 49%);border:3px dashed #ffffffd0;box-shadow:0 2px 0 #0008,0 0 0 1px #0005}
+.chip{position:absolute;width:24px;height:24px}
+.fchip{position:fixed;left:0;top:0;width:20px;height:20px;z-index:40;pointer-events:none;will-change:transform}
+.fx{position:fixed;inset:0;pointer-events:none;z-index:40}
+.bet{position:absolute;transform:translate(-50%,-50%);z-index:1;background:#0b0820b8;border:1px solid #ffffff22;border-radius:999px;padding:1px 9px 1px 5px;font-size:.78rem;font-weight:700;white-space:nowrap}
+.seat{position:absolute;transform:translate(-50%,-50%);width:108px;display:flex;flex-direction:column;align-items:center;z-index:2}
+.av{position:relative;width:62px;height:62px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(160deg,#5a4bc0,#251d62);border:3px solid #ffffff30;
+  font-family:var(--display);font-size:1.7rem;color:var(--gold);box-shadow:0 6px 16px #0009;transition:box-shadow .2s,border-color .2s}
+.seat.bot .av{background:linear-gradient(160deg,#3f6a8f,#1b2d47)}
+.seat.cur .av{border-color:var(--gold);box-shadow:0 0 0 3px #f2b43c66,0 0 24px #f2b43c99}
+.seat.win .av{border-color:var(--ok);box-shadow:0 0 0 4px #52c48d99,0 0 30px #52c48d}
+.seat.talking .av{box-shadow:0 0 0 4px #52c48daa,0 0 20px #52c48d}
+.seat.packed .av,.seat.out .av{filter:grayscale(.85);opacity:.55}
+.ring{position:absolute;inset:-9px;width:calc(100% + 18px);height:calc(100% + 18px);transform:rotate(-90deg);pointer-events:none;overflow:visible}
+.ring circle{fill:none;stroke-width:5;stroke-linecap:round;stroke-dasharray:100;animation-name:tick;animation-timing-function:linear;animation-fill-mode:forwards}
+@keyframes tick{0%{stroke-dashoffset:0;stroke:#52c48d}55%{stroke:#f2b43c}80%{stroke:#ff5a5f}100%{stroke-dashoffset:100;stroke:#ff5a5f}}
+.tag{position:absolute;bottom:-9px;left:50%;transform:translateX(-50%);font-size:.64rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;padding:1px 7px;border-radius:999px;background:#0b0820e6;border:1px solid var(--line);color:var(--muted);font-family:var(--body)}
+.tag.blind{color:#c8b8ff;border-color:#5b4bb0}
+.tag.seen{color:var(--gold);border-color:var(--gold-deep)}
+.tag.packed{color:#ff8fa0;border-color:#6b2a3c}
+.dlr{position:absolute;top:-5px;left:-5px;width:22px;height:22px;border-radius:50%;background:var(--fg);color:var(--ink);font:800 .75rem/22px var(--body);text-align:center;box-shadow:0 2px 4px #0008}
+.plate{margin-top:12px;background:#0b0820dd;border:1px solid var(--line);border-radius:10px;padding:2px 8px 3px;text-align:center;line-height:1.2;max-width:100%}
+.plate .nm{display:block;font-weight:800;font-size:.82rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.plate .cn{font-size:.78rem;color:var(--gold)}
+.badges{display:flex;gap:3px;margin-top:3px;flex-wrap:wrap;justify-content:center}
+.badges span{font-size:.6rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:0 6px;border-radius:999px;border:1px solid var(--line);color:var(--muted);background:#0b0820cc}
+.badges .you,.badges .mic{color:var(--ok);border-color:#2f7a57}
+.badges .off{color:#ff8fa0;border-color:#6b2a3c}
+.hc{display:flex}
+.hc .card{--w:22px;font-size:7px}
+.hc.down{position:absolute;top:6px;left:calc(50% + 24px)}
+.hc.down .card{margin-left:-14px;border-width:2px}
+.hc.down .card:first-child{margin-left:0;transform:rotate(-12deg)}
+.hc.down .card:last-child{transform:rotate(12deg)}
+.hc.up{margin-top:4px}
+.hc.up .card{--w:30px;margin-left:-5px}
+.hc.up .card:first-child{margin-left:0}
+.hn{font-size:.66rem;font-weight:700;color:var(--gold);text-align:center;line-height:1.15;margin-top:2px;text-shadow:0 1px 3px #000}
+.seat.packed .hn{color:var(--muted)}
+.cmp .side .pill{margin-top:-4px}
+@media (max-width:640px){
+  .tablewrap{padding:52px 0 96px}
+  .table{aspect-ratio:.8/1}
+  .seat{width:86px}
+  .av{width:48px;height:48px;font-size:1.3rem}
+  .plate .nm{font-size:.74rem}.plate .cn{font-size:.72rem}
+  .hc.down{left:calc(50% + 16px)}
+  .hc.up .card{--w:26px}
+  .center{width:58%}
+  .center .camt{font-size:1.5rem}
+  .tablewrap{padding-bottom:70px}
+  .dock{padding:10px 12px;gap:8px;border-radius:16px}
+  .dock .who{font-size:.85rem}
+  .dock h2{font-size:1.15rem}
+  .dock .card.lg{--w:44px}
+  .hand{flex-wrap:nowrap;gap:8px}
+  .hand button{padding:6px 10px;font-size:.85rem}
+  .dock .handname{font-size:.95rem}
+  .acts{grid-template-columns:repeat(auto-fit,minmax(72px,1fr));gap:6px}
+  .acts button{padding:8px 4px;font-size:.85rem}
+  .acts button small{font-size:.68rem}
+  .dock > .why{font-size:.75rem}
+}
+.hc .card.deal{animation-name:dealfade}
+@keyframes dealfade{from{opacity:0;translate:0 -14px}to{opacity:1;translate:0 0}}
+@media (prefers-reduced-motion:reduce){.ring circle{animation:none}}
 .mini{display:flex;gap:4px}
 
 .card{--w:46px;width:var(--w);height:calc(var(--w)*1.4);border-radius:calc(var(--w)*.12);background:var(--card);color:var(--ink);position:relative;flex:none;box-shadow:0 2px 6px #0007;font-weight:800;font-size:calc(var(--w)*.3)}
@@ -97,7 +161,7 @@ input,select{font:inherit;color:var(--fg);background:var(--bg);border:1px solid 
 @keyframes deal{from{transform:translateY(-10px) rotate(-6deg);opacity:.5}to{transform:none;opacity:1}}
 @media (prefers-reduced-motion:reduce){.card.deal{animation:none}}
 
-.dock{background:linear-gradient(180deg,var(--felt-2),var(--felt));border:1px solid var(--gold-deep);border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:14px}
+.dock{position:sticky;bottom:max(8px,env(safe-area-inset-bottom,0px));z-index:5;box-shadow:0 -10px 30px #000a;background:linear-gradient(180deg,var(--felt-2),var(--felt));border:1px solid var(--gold-deep);border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:14px}
 .dock .who{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
 .hand{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .handname{font-family:var(--display);font-size:1.2rem;color:var(--gold)}
@@ -110,7 +174,7 @@ details.rules summary{cursor:pointer;font-weight:800}
 .rules ol{padding-left:1.2em;margin:8px 0}
 .rules li{margin:4px 0}
 .rules p{margin:8px 0}
-.ov{position:fixed;inset:0;background:#0b0820f2;display:grid;place-items:center;z-index:20;
+.ov{position:fixed;inset:0;background:#0b0820c4;backdrop-filter:blur(3px);display:grid;place-items:center;z-index:20;
   padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));overflow:auto}
 .ov .box{width:min(560px,100%);background:var(--felt);border:1px solid var(--gold-deep);border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:16px;text-align:center;align-items:center}
 .big{font-family:var(--display);font-size:2.2rem;color:var(--gold);line-height:1.1}
@@ -159,6 +223,9 @@ details.rules summary{cursor:pointer;font-weight:800}
       <label for="hBots">Computer players
         <select id="hBots"><option value="0" selected>None</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select>
       </label>
+      <label for="hTimer">Time per turn
+        <select id="hTimer"><option value="0">No timer</option><option value="15">15 seconds</option><option value="20">20 seconds</option><option value="30" selected>30 seconds</option><option value="45">45 seconds</option><option value="60">60 seconds</option></select>
+      </label>
     </div>
     <div class="row"><button class="gold" data-act="createRoom">Create room</button><button class="ghost" data-act="home">Back</button></div>
   </section>
@@ -183,6 +250,9 @@ details.rules summary{cursor:pointer;font-weight:800}
       <label for="startCoins">Starting coins each<input id="startCoins" type="number" min="50" step="50" value="1000"></label>
       <label for="boot">Boot (entry per round)<input id="boot" type="number" min="1" step="1" value="10"></label>
       <label for="potLimit">Pot limit (0 = none)<input id="potLimit" type="number" min="0" step="10" value="1000"></label>
+      <label for="lTimer">Time per turn
+        <select id="lTimer"><option value="0">No timer</option><option value="15">15 seconds</option><option value="20">20 seconds</option><option value="30" selected>30 seconds</option><option value="45">45 seconds</option><option value="60">60 seconds</option></select>
+      </label>
     </div>
     <div class="names">
       <label for="n0">Player 1<input id="n0" value="Riya" maxlength="14"></label>
@@ -227,12 +297,14 @@ details.rules summary{cursor:pointer;font-weight:800}
     <p><b>Blind</b> players haven't looked at their cards. They bet the current stake, or double it to raise. <b>Seen</b> players bet 2× the stake (chaal), or 4× to raise. Every raise doubles the stake.</p>
     <p><b>Side show</b>: a seen player can pay a chaal to ask the previous seen player to compare cards privately. If they accept, the lower hand packs. On a tie, the player who asked packs.</p>
     <p><b>Show</b>: when only two players are left, either can pay to show. Both hands are revealed and the best wins. On a tie, the player who asked loses. If the pot hits the pot limit, everyone still in shows.</p>
-    <p>Online, if someone stops responding for 90 seconds, anyone at the table can pack for them so the game keeps moving.</p>
+    <p><b>Turn timer</b>: if the table has a timer and it runs out, that player packs automatically. An unanswered side show counts as refused. With no timer, anyone can pack for a player who's been away for 90 seconds.</p>
+    <p>When a round ends, everyone's cards are shown, including packed hands. This doesn't change who won. The pot was already decided.</p>
   </details>
 </div>
 
 <div class="ov" id="ov" hidden></div>
 <div class="toast" id="toast" hidden></div>
+<div class="fx" id="fx" aria-hidden="true"></div>
 
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <script>
@@ -289,18 +361,18 @@ function costs(G, s){ const st = G.stake; return s.seen ? {bet:2*st, raise:4*st,
 const maxStake = G => G.boot * 128;
 function canSide(G, i){ const s = G.seats[i]; if (!s.seen || active(G).length < 3) return false; const t = G.seats[prevActive(G, i)]; return t.seen && s.coins >= costs(G, s).side; }
 function glog(G, m){ G.log.unshift(m); G.log = G.log.slice(0, 8); }
-function pay(G, s, a){ s.coins -= a; G.pot += a; }
+function pay(G, s, a){ s.coins -= a; G.pot += a; s.bet = (s.bet || 0) + a; }
 function touch(G){ G.moveN = (G.moveN || 0) + 1; G.turnAt = Date.now(); }
-function newSeat(uid, name, coins){ return {uid, name, coins, cards:[], seen:false, packed:false, inRound:false}; }
+function newSeat(uid, name, coins){ return {uid, name, coins, cards:[], seen:false, packed:false, inRound:false, act:'', bet:0}; }
 function newGame(cfg){
-  return {phase:'lobby', seats:[], boot:cfg.boot, potLimit:cfg.potLimit, startCoins:cfg.startCoins, dealer:-1, turn:0, pot:0, stake:cfg.boot,
+  return {phase:'lobby', seats:[], boot:cfg.boot, potLimit:cfg.potLimit, startCoins:cfg.startCoins, turnSec:cfg.turnSec || 0, dealer:-1, turn:0, pot:0, stake:cfg.boot,
           roundNo:0, log:[], result:null, sideshow:null, lastSide:null, sideN:0, moveN:0, turnAt:Date.now()};
 }
 function startRound(G){
-  if (G.seats.filter(s => s.coins >= G.boot).length < 2) return 'At least two players need enough coins for the boot. Top someone up first.';
+  if (G.seats.filter(s => s.coins >= G.boot).length < 2) return 'At least two players need enough coins for the boot. Start a new game to reset everyone\'s coins.';
   const deck = newDeck();
   G.pot = 0; G.stake = G.boot; G.result = null; G.sideshow = null; G.roundNo++;
-  G.seats.forEach(s => { s.packed = false; s.seen = false; s.cards = []; s.inRound = s.coins >= G.boot; });
+  G.seats.forEach(s => { s.packed = false; s.seen = false; s.cards = []; s.act = ''; s.bet = 0; s.inRound = s.coins >= G.boot; });
   const n = G.seats.length; if (G.dealer >= n) G.dealer = n - 1;
   for (let k = 1; k <= n; k++){ const j = (G.dealer + k + n) % n; if (G.seats[j].inRound){ G.dealer = j; break; } }
   G.seats.forEach(s => { if (s.inRound) pay(G, s, G.boot); });
@@ -319,10 +391,13 @@ function advance(G){
 function finish(G, winners, reason, revealIdx){
   const share = Math.floor(G.pot / winners.length); let rem = G.pot - share * winners.length;
   winners.forEach(i => { G.seats[i].coins += share + (rem > 0 ? 1 : 0); if (rem > 0) rem--; });
+  // The round is over, so everyone's cards are shown (packed hands too). This never changes who won.
+  const dealt = G.seats.map((s,i) => i).filter(i => G.seats[i].inRound);
   G.result = {
     winners: winners.map(i => G.seats[i].uid), names: winners.map(i => G.seats[i].name), reason, pot: G.pot,
-    hands: revealIdx.map(i => ({uid:G.seats[i].uid, name:G.seats[i].name, cards:G.seats[i].cards, win:winners.includes(i)})),
-    winHand: revealIdx.length ? evaluate(G.seats[winners[0]].cards).name : ''
+    hands: dealt.map(i => ({uid:G.seats[i].uid, name:G.seats[i].name, cards:G.seats[i].cards, win:winners.includes(i), packed:G.seats[i].packed})),
+    showed: revealIdx.map(i => G.seats[i].uid),
+    winHand: evaluate(G.seats[winners[0]].cards).name
   };
   glog(G, `${winners.map(i => G.seats[i].name).join(' & ')} won ${G.pot}.`);
   G.pot = 0; G.phase = 'roundEnd'; G.sideshow = null; touch(G);
@@ -339,7 +414,7 @@ function sideAnswer(G, accept){
   if (accept){
     const r = cmp(evaluate(A.cards), evaluate(B.cards));
     const loser = r > 0 ? ss.to : ss.from;
-    G.seats[loser].packed = true;
+    G.seats[loser].packed = true; G.seats[loser].act = 'Packed';
     G.sideN = (G.sideN || 0) + 1;
     G.lastSide = {id:G.sideN, round:G.roundNo,
       a:{uid:A.uid, name:A.name, cards:A.cards}, b:{uid:B.uid, name:B.name, cards:B.cards}, loser:G.seats[loser].uid, loserName:G.seats[loser].name};
@@ -352,7 +427,7 @@ function act(G, i, a){
   if (!s) return 'Take a seat first.';
   if (a === 'see'){
     if (!live(s) || s.seen || !['play','sideAsk'].includes(G.phase)) return null;
-    s.seen = true; glog(G, `${s.name} looked at their cards.`); return null;
+    s.seen = true; if (!s.act || s.act === 'Blind') s.act = 'Seen'; glog(G, `${s.name} looked at their cards.`); return null;
   }
   if (a === 'sideYes' || a === 'sideNo'){
     if (G.phase !== 'sideAsk' || G.sideshow.to !== i) return 'That side show is already settled.';
@@ -362,14 +437,14 @@ function act(G, i, a){
     if (Date.now() - G.turnAt < AWAY_MS) return 'Give them a little longer.';
     if (G.phase === 'sideAsk'){ glog(G, `${G.seats[G.sideshow.to].name} didn't answer, so the side show was refused.`); sideAnswer(G, false); return null; }
     if (G.phase !== 'play' || G.turn === i) return 'Nothing to skip.';
-    const t = G.seats[G.turn]; t.packed = true; glog(G, `${t.name} was away and got packed.`);
+    const t = G.seats[G.turn]; t.packed = true; t.act = 'Packed'; glog(G, `${t.name} was away and got packed.`);
     const left = active(G); if (left.length === 1){ finish(G, [G.seats.indexOf(left[0])], 'Everyone else packed.', []); return null; }
     advance(G); return null;
   }
   if (G.phase !== 'play' || G.turn !== i) return "It isn't your turn.";
   const c = costs(G, s);
   if (a === 'pack'){
-    s.packed = true; glog(G, `${s.name} packed.`);
+    s.packed = true; s.act = 'Packed'; glog(G, `${s.name} packed.`);
     const left = active(G); if (left.length === 1){ finish(G, [G.seats.indexOf(left[0])], 'Everyone else packed.', []); return null; }
     advance(G); return null;
   }
@@ -377,12 +452,13 @@ function act(G, i, a){
     const amt = c[a]; if (s.coins < amt) return 'Not enough coins.';
     if (a === 'raise' && G.stake * 2 > maxStake(G)) return 'The stake is already at the limit.';
     pay(G, s, amt); if (a === 'raise') G.stake *= 2;
+    s.act = s.seen ? (a === 'raise' ? 'Raise' : 'Chaal') : (a === 'raise' ? 'Blind ×2' : 'Blind');
     glog(G, `${s.name} ${s.seen ? (a==='raise' ? 'raised' : 'played chaal') : (a==='raise' ? 'raised blind' : 'played blind')} ${amt}.`);
     advance(G); return null;
   }
   if (a === 'show'){
     if (active(G).length !== 2 || s.coins < c.show) return 'Show needs exactly two players left.';
-    pay(G, s, c.show);
+    pay(G, s, c.show); s.act = 'Show';
     const oi = nextActive(G, i), o = G.seats[oi];
     glog(G, `${s.name} paid ${c.show} for a show.`);
     const r = cmp(evaluate(s.cards), evaluate(o.cards));
@@ -391,11 +467,19 @@ function act(G, i, a){
   }
   if (a === 'side'){
     if (!canSide(G, i)) return "A side show isn't possible right now.";
-    const ti = prevActive(G, i); pay(G, s, c.side);
+    const ti = prevActive(G, i); pay(G, s, c.side); s.act = 'Side show';
     glog(G, `${s.name} paid ${c.side} and asked ${G.seats[ti].name} for a side show.`);
     G.sideshow = {from:i, to:ti}; G.phase = 'sideAsk'; touch(G); return null;
   }
   return 'Unknown move.';
+}
+// The turn timer ran out: the player packs, or an unanswered side show counts as refused.
+function timeoutMove(G){
+  if (G.phase === 'sideAsk'){ glog(G, `${G.seats[G.sideshow.to].name} ran out of time, so the side show was refused.`); sideAnswer(G, false); return G; }
+  if (G.phase !== 'play') return G;
+  const t = G.seats[G.turn]; t.packed = true; t.act = 'Packed'; glog(G, `${t.name} ran out of time and packed.`);
+  const left = active(G); if (left.length === 1) finish(G, [G.seats.indexOf(left[0])], 'Everyone else packed.', []); else advance(G);
+  return G;
 }
 // Table-level requests (joining, dealing) plus moves. Returns new G or an error string.
 const MOVES = ['see','bet','raise','pack','show','side','sideYes','sideNo','skip'];
@@ -430,7 +514,7 @@ function handle(G, pid, m){
     }
     case 'reset':
       if (i < 0) return 'Take a seat first.';
-      G.seats.forEach(s => { s.coins = G.startCoins; s.cards = []; s.packed = false; s.seen = false; s.inRound = false; });
+      G.seats.forEach(s => { s.coins = G.startCoins; s.cards = []; s.packed = false; s.seen = false; s.inRound = false; s.act = ''; s.bet = 0; });
       Object.assign(G, {phase:'lobby', pot:0, stake:G.boot, roundNo:0, result:null, sideshow:null, lastSide:null, dealer:-1, log:[]});
       glog(G, `New game: everyone is back to ${G.startCoins} coins.`); touch(G); return G;
     case 'voice':
@@ -500,7 +584,7 @@ function botDecide(G, i){
   if (st < 0.45 + pressure * 0.25 && r < 0.5) return 'pack';
   return canBet ? 'bet' : 'pack';
 }
-window.__tp = {evaluate, cmp, newGame, newSeat, startRound, act, handle, addBot, botActor, botDecide, botStrength};
+window.__tp = {evaluate, cmp, newGame, newSeat, startRound, act, handle, timeoutMove, addBot, botActor, botDecide, botStrength};
 
 // ================= device identity =================
 // One identity per browser tab (survives reloads), so two tabs or two devices are two players.
@@ -512,7 +596,7 @@ if (!PID){ PID = 'p' + Math.random().toString(36).slice(2, 12); try { sessionSto
 // mode: home | hostSetup | joinSetup | local | host | client
 let G = null;    // what this device renders (host: its own redacted view; client: last view from host)
 let HG = null;   // host only: full authoritative state
-const V = {mode:'home', reveal:false, revealRound:-1, readyKey:-1, sideSeen:0, sidePeek:0, animRound:-1, net:'', netErr:'', code:''};
+const V = {mode:'home', skew:0, readyAt:0, timedOut:-1, reveal:false, revealRound:-1, readyKey:-1, sideSeen:0, sidePeek:0, animRound:-1, net:'', netErr:'', code:''};
 const NET = {peer:null, conns:new Map(), hostConn:null, retry:null, wantName:''};
 let confirmReset = false;
 const online = () => V.mode === 'host' || V.mode === 'client';
@@ -542,6 +626,7 @@ function viewFor(pid){
   if (v.lastSide && v.lastSide.a.uid !== pid && v.lastSide.b.uid !== pid){ v.lastSide.a.cards = []; v.lastSide.b.cards = []; }
   v.online = [PID, ...NET.conns.keys()];
   v.code = V.code;
+  v.now = Date.now();
   return v;
 }
 let botTimer = null;
@@ -554,11 +639,19 @@ function scheduleBots(){
     if (hostApply(uid, {a})) hostApply(uid, {a:'pack'});   // safety net: never stall the table
   }, 1100 + Math.random() * 1100);
 }
+let turnTimer = null;
+function scheduleTurnTimer(){
+  clearTimeout(turnTimer);
+  if (V.mode !== 'host' || !HG || !HG.turnSec || !['play','sideAsk'].includes(HG.phase)) return;
+  const mv = HG.moveN, wait = HG.turnAt + HG.turnSec * 1000 - Date.now() + 150;
+  turnTimer = setTimeout(() => { if (!HG || HG.moveN !== mv || V.mode !== 'host') return; HG = timeoutMove(clone(HG)); broadcast(); }, Math.max(0, wait));
+}
 function broadcast(){
   store.set(K.host, JSON.stringify({code:V.code, g:HG, pid:PID}));
   for (const [pid, c] of NET.conns) if (c.open) { try { c.send({t:'state', g:viewFor(pid)}); } catch(e){} }
   G = viewFor(PID); render();
   scheduleBots();
+  scheduleTurnTimer();
 }
 function hostApply(pid, m){
   const res = handle(clone(HG), pid, m);
@@ -615,8 +708,8 @@ function connectClient(){
       if (VOICE.on){ closeAllCalls(); conn.send({t:'req', ...voiceReq()}); }
     });
     conn.on('data', m => {
-      if (!m || typeof m !== 'object') return;
-      if (m.t === 'state'){ clearTimeout(timer); G = m.g; V.net = ''; V.netErr = ''; render(); }
+      if (!m || typeof m !== 'object' || V.mode !== 'client' || NET.hostConn !== conn) return;   // ignore a room we've left
+      if (m.t === 'state'){ clearTimeout(timer); G = m.g; V.skew = Date.now() - (m.g.now || Date.now()); V.net = ''; V.netErr = ''; render(); }
       else if (m.t === 'err') toast(String(m.msg));
     });
     conn.on('close', () => {
@@ -774,30 +867,138 @@ function cardHTML(c, up, size='', deal=false, i=0){
 }
 const coins = n => `<span class="num"><span class="coin"></span>${Number(n).toLocaleString()}</span>`;
 
-function seatHTML(s, i){
+// ---------- turn timer ----------
+// Returns {start (this device's clock), sec} while someone's turn clock is running, else null.
+function turnClock(){
+  if (!G || !G.turnSec) return null;
+  if (V.mode === 'local') return G.phase === 'play' && V.readyKey === G.moveN ? {start:V.readyAt, sec:G.turnSec} : null;
+  if (!['play','sideAsk'].includes(G.phase)) return null;
+  return {start:(G.turnAt || 0) + (V.mode === 'client' ? V.skew : 0), sec:G.turnSec};
+}
+const secsLeft = c => Math.max(0, Math.ceil(c.sec - (Date.now() - c.start) / 1000));
+function tickClock(){
+  const c = turnClock(), left = c ? secsLeft(c) : null;
+  document.querySelectorAll('.cd').forEach(e => { e.textContent = left == null ? '' : left + 's'; e.classList.toggle('low', left != null && left <= 5); });
+  if (V.mode === 'local' && c && left === 0 && V.timedOut !== G.moveN){ V.timedOut = G.moveN; runLocal(x => timeoutMove(x)); }
+}
+setInterval(tickClock, 250);
+
+// ---------- the round table ----------
+const actorSeat = () => G.phase === 'play' ? G.turn : G.phase === 'sideAsk' ? G.sideshow.to : -1;
+function seatHTML(s, i, x, y, dealAnim){
   const me = online() && s.uid === PID;
   const res = G.result;
   const shown = G.phase === 'roundEnd' && res && res.hands.find(h => h.uid === s.uid);
-  const isCur = (G.phase === 'play' && i === G.turn) || (G.phase === 'sideAsk' && i === G.sideshow.to);
+  const isCur = i === actorSeat();
   const isWin = G.phase === 'roundEnd' && res && res.winners.includes(s.uid);
   const off = online() && G.online && !s.bot && !G.online.includes(s.uid);
-  const pills = [];
-  if (me) pills.push('<span class="pill you">You</span>');
-  if (s.bot) pills.push('<span class="pill">Computer</span>');
-  if (off) pills.push('<span class="pill off">Offline</span>');
+  const badges = [];
+  if (me) badges.push('<span class="you">You</span>');
+  if (s.bot) badges.push('<span>Computer</span>');
+  if (off) badges.push('<span class="off">Offline</span>');
   const vc = online() && G.voice && G.voice[s.uid];
-  if (vc) pills.push(vc.muted ? '<span class="pill off">Muted</span>' : '<span class="pill mic">Mic on</span>');
-  if (i === G.dealer && G.phase !== 'lobby') pills.push('<span class="pill dealer">Dealer</span>');
-  if (G.phase === 'lobby') pills.push('<span class="pill">Ready</span>');
-  else if (!s.inRound) pills.push('<span class="pill">Next round</span>');
-  else if (s.packed) pills.push('<span class="pill packed">Packed</span>');
-  else pills.push(s.seen ? '<span class="pill seen">Seen</span>' : '<span class="pill blind">Blind</span>');
-  const cards = shown ? shown.cards : s.cards;
-  const cardRow = s.inRound && G.phase !== 'lobby' ? `<div class="mini">${cards.map(c => cardHTML(c, !!shown, 'sm')).join('')}</div>` : '';
-  return `<div data-uid="${esc(s.uid)}" class="seat ${VOICE.talking.has(s.uid) ? 'talking' : ''} ${isCur ? 'cur' : ''} ${s.packed && G.phase !== 'lobby' ? 'packed' : ''} ${!s.inRound && G.phase !== 'lobby' ? 'out' : ''} ${isWin ? 'win' : ''}">
-    <div class="sr"><span class="nm">${esc(s.name)}</span>${coins(s.coins)}</div>
-    <div class="pills">${pills.join('')}</div>${cardRow}${shown ? `<div class="why">${esc(evaluate(shown.cards).name)}</div>` : ''}</div>`;
+  if (vc) badges.push(vc.muted ? '<span class="off">Muted</span>' : '<span class="mic">Mic on</span>');
+  let tag, tcls = '';
+  if (G.phase === 'lobby') tag = 'Ready';
+  else if (!s.inRound) tag = 'Next round';
+  else if (s.packed){ tag = 'Packed'; tcls = 'packed'; }
+  else { tag = s.act || (s.seen ? 'Seen' : 'Blind'); tcls = s.seen ? 'seen' : 'blind'; }
+  if (isWin){ tag = 'Winner'; tcls = 'seen'; }
+  const clock = isCur ? turnClock() : null;
+  const ring = clock ? `<svg class="ring" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="30" pathLength="100" style="animation-duration:${clock.sec}s;animation-delay:-${((Date.now() - clock.start) / 1000).toFixed(2)}s"/></svg>` : '';
+  let cards = '';
+  if (shown) cards = `<div class="hc up">${shown.cards.map(c => cardHTML(c, true)).join('')}</div><div class="hn">${shown.packed ? 'Packed · ' : ''}${esc(evaluate(shown.cards).name)}</div>`;
+  else if (s.inRound && !s.packed && G.phase !== 'lobby') cards = `<div class="hc down">${s.cards.map((c,k) => cardHTML(c, false, '', dealAnim, k + i * 3)).join('')}</div>`;
+  const initial = esc((s.name.trim()[0] || '?').toUpperCase());
+  return `<div data-uid="${esc(s.uid)}" class="seat ${s.bot ? 'bot' : ''} ${VOICE.talking.has(s.uid) ? 'talking' : ''} ${isCur ? 'cur' : ''} ${s.packed && G.phase !== 'lobby' ? 'packed' : ''} ${!s.inRound && G.phase !== 'lobby' ? 'out' : ''} ${isWin ? 'win' : ''}" style="left:${x.toFixed(2)}%;top:${y.toFixed(2)}%">
+    <div class="av">${ring}${initial}${i === G.dealer && G.phase !== 'lobby' ? '<span class="dlr" title="Dealer">D</span>' : ''}<span class="tag ${tcls}">${esc(tag)}</span>${cards && !shown ? cards : ''}</div>
+    <div class="plate"><span class="nm">${esc(s.name)}</span><span class="cn">${coins(s.coins)}</span></div>
+    ${shown ? cards : ''}
+    ${badges.length ? `<div class="badges">${badges.join('')}</div>` : ''}
+  </div>`;
 }
+function centerHTML(){
+  if (G.phase === 'lobby') return `<div class="clbl">Waiting for players</div><div class="cmeta">${G.seats.length} of 6 seated</div>`;
+  const chips = ['#d33b4a','#2f6fd6','#2e9e5b','#f2b43c','#7a3fd0','#d33b4a','#2f6fd6'];
+  const n = G.pot ? Math.min(7, 2 + Math.floor(Math.log2(G.pot / G.boot + 1))) : 0;
+  const pile = `<div class="pile" id="potSpot">${Array.from({length:n}, (_, k) => `<span class="chip" style="--c:${chips[k]};left:${[26,8,44,17,35,26,12][k]}px;top:${[4,6,6,0,1,-3,1][k]}px"></span>`).join('')}</div>`;
+  if (G.phase === 'roundEnd' && G.result){
+    const r = G.result;
+    return `${pile}<div class="clbl">Round ${G.roundNo}</div><div class="camt">${esc(r.names.join(' & '))} ${r.winners.length > 1 ? 'split' : 'wins'} ${Number(r.pot).toLocaleString()}</div><div class="cmeta">${esc(r.winHand)}</div>`;
+  }
+  const a = actorSeat(), who = a >= 0 ? G.seats[a] : null;
+  let stat = '';
+  if (who){
+    const mine = online() && who.uid === PID;
+    const verb = G.phase === 'sideAsk' ? 'deciding on a side show' : 'to play';
+    stat = mine ? `Your turn` : `${esc(who.name)} ${verb}`;
+    if (V.mode === 'local' && G.phase === 'play' && V.readyKey !== G.moveN) stat = `Pass to ${esc(who.name)}`;
+    if (G.turnSec) stat += ` <span class="cd"></span>`;
+  }
+  return `${pile}<div class="clbl">Pot</div><div class="camt num" id="potAmt">${G.pot.toLocaleString()}</div><div class="cmeta">Stake ${G.stake} · chaal ${G.stake * 2}</div>${stat ? `<div class="cstat">${stat}</div>` : ''}`;
+}
+function tableHTML(){
+  const n = G.seats.length, me = online() ? mySeat() : -1, anchor = me >= 0 ? me : 0;
+  const narrow = window.matchMedia('(max-width:640px)').matches;
+  const rx = narrow ? 39 : 45, ry = narrow ? 45 : 47;
+  const dealAnim = G.phase === 'play' && V.seatDeal !== G.roundNo;
+  let seats = '', bets = '';
+  G.seats.forEach((s, i) => {
+    const d = (i - anchor + n) % n, th = (90 + d * 360 / n) * Math.PI / 180;   // you sit at the bottom; play goes clockwise
+    const x = 50 + rx * Math.cos(th), y = 50 + ry * Math.sin(th);
+    seats += seatHTML(s, i, x, y, dealAnim);
+    const side = Math.abs(Math.cos(th)) > .3;   // bet label sits between the seat and the pot
+    const kx = narrow ? .5 : .56, ky = narrow ? (side ? .74 : .5) : .5;
+    if (G.phase !== 'lobby' && s.inRound && s.bet) bets += `<div class="bet" style="left:${(50 + (x - 50) * kx).toFixed(2)}%;top:${(50 + (y - 50) * ky).toFixed(2)}%">${coins(s.bet)}</div>`;
+  });
+  if (dealAnim) V.seatDeal = G.roundNo;
+  return `<div class="tablewrap"><div class="table"><div class="felt"></div>${bets}<div class="center">${centerHTML()}</div>${seats}</div></div>`;
+}
+
+// ---------- coins thrown into the pot ----------
+const FX = {prev:null};
+const reduceMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+function snap(){ return G ? {round:G.roundNo, phase:G.phase, bets:Object.fromEntries(G.seats.map(s => [s.uid, s.inRound ? (s.bet || 0) : 0])), winners:G.result ? G.result.winners : []} : null; }
+function seatAv(uid){ return document.querySelector(`.seat[data-uid="${CSS.escape(uid)}"] .av`); }
+function flyChips(fromEl, toEl, n, delay){
+  const a = fromEl.getBoundingClientRect(), b = toEl.getBoundingClientRect(), fx = $('fx');
+  const colors = ['#d33b4a','#2f6fd6','#2e9e5b','#f2b43c','#7a3fd0'];
+  for (let k = 0; k < n; k++){
+    const c = document.createElement('div'); c.className = 'fchip'; c.style.setProperty('--c', colors[(k + randInt(5)) % 5]);
+    const sx = a.left + a.width / 2 - 10, sy = a.top + a.height / 2 - 10;
+    const ex = b.left + b.width / 2 - 10 + (Math.random() - .5) * 34, ey = b.top + b.height / 2 - 10 + (Math.random() - .5) * 16;
+    const mx = (sx + ex) / 2 + (Math.random() - .5) * 30, my = Math.min(sy, ey) - 50 - Math.random() * 30;
+    fx.appendChild(c);
+    const anim = c.animate([
+      {transform:`translate(${sx}px,${sy}px) scale(.7) rotate(0deg)`, opacity:0},
+      {transform:`translate(${sx}px,${sy}px) scale(1) rotate(0deg)`, opacity:1, offset:.08},
+      {transform:`translate(${mx}px,${my}px) scale(1.2) rotate(240deg)`, opacity:1, offset:.5},
+      {transform:`translate(${ex}px,${ey}px) scale(1) rotate(400deg)`, opacity:1, offset:.9},
+      {transform:`translate(${ex}px,${ey + 2}px) scale(1) rotate(410deg)`, opacity:0}
+    ], {duration:700, delay:delay + k * 75, easing:'cubic-bezier(.3,.6,.4,1)', fill:'both'});
+    const gone = () => c.remove();
+    anim.onfinish = gone; setTimeout(gone, delay + k * 75 + 900);   // backup if the browser pauses animations
+  }
+}
+function animateChips(prev){
+  const cur = snap(); FX.prev = cur;
+  if (!prev || !cur || cur.phase === 'lobby' || reduceMotion()) return;
+  const pot = $('potSpot'); if (!pot) return;
+  const newRound = cur.round !== prev.round;
+  if (newRound && cur.round !== prev.round + 1) return;
+  const count = d => Math.max(2, Math.min(7, 1 + Math.round(Math.log2(d / G.boot + 1))));
+  let delay = 0, any = false;
+  for (const s of G.seats){
+    const d = (cur.bets[s.uid] || 0) - (newRound ? 0 : (prev.bets[s.uid] || 0));
+    const el = d > 0 && seatAv(s.uid);
+    if (el){ flyChips(el, pot, count(d), delay); any = true; if (newRound) delay += 90; }
+  }
+  if (!newRound && cur.phase === 'roundEnd' && prev.phase !== 'roundEnd'){
+    const total = G.result ? G.result.pot : G.boot * 4;
+    cur.winners.forEach(uid => { const el = seatAv(uid); if (el) flyChips(pot, el, Math.min(9, count(total) + 2), any ? 650 : 150); });
+  }
+}
+window.addEventListener('resize', () => { clearTimeout(window.__rz); window.__rz = setTimeout(() => { if (G) render(); }, 150); });
 
 function dockHTML(){
   const i = mySeat();
@@ -820,7 +1021,7 @@ function dockHTML(){
   } else {
     buttons += btn('bet', 'Chaal', c.bet, s.coins >= c.bet, 'gold');
     buttons += btn('raise', 'Raise', c.raise, s.coins >= c.raise && canRaise);
-    if (!two && live(s)) buttons += btn('side', `Side show with ${esc(G.seats[prevActive(G, i)].name)}`, c.side, canSide(G, i));
+    if (!two && live(s)) buttons += btn('side', 'Side show', c.side, canSide(G, i));
   }
   if (two) buttons += btn('show', 'Show', c.show, s.coins >= c.show);
   let hint = '';
@@ -829,7 +1030,7 @@ function dockHTML(){
   else if (myTurn && s.coins < c.bet) hint = `Not enough coins to stay in. You can pack${two && s.coins >= c.show ? ' or show' : ''}.`;
   else if (myTurn && s.seen && !two && !G.seats[prevActive(G, i)].seen) hint = `Side show needs ${esc(G.seats[prevActive(G, i)].name)} to have seen their cards.`;
   const ev = up && s.cards[0] && s.cards[0].r ? evaluate(s.cards) : null;
-  const title = V.mode === 'local' ? `${esc(s.name)}'s turn` : (myTurn ? 'Your turn' : 'Your hand');
+  const title = (V.mode === 'local' ? `${esc(s.name)}'s turn` : (myTurn ? 'Your turn' : 'Your hand')) + (myTurn && G.turnSec ? ' <span class="cd"></span>' : '');
   return `<section class="dock" aria-label="Your hand">
     <div class="who"><h2>${title}</h2><span class="muted">${s.packed ? 'Packed' : s.seen ? 'Seen' : 'Playing blind'} · ${coins(s.coins)}</span></div>
     <div class="hand">${s.cards.map((cd,k) => cardHTML(cd, up, 'lg', deal, k)).join('')}
@@ -844,18 +1045,12 @@ function dockHTML(){
 }
 
 function statusHTML(){
-  if (!online()) return '';
+  if (!online() || G.turnSec) return '';
   const i = mySeat();
   const away = i >= 0 && Date.now() - (G.turnAt || 0) > AWAY_MS;
-  if (G.phase === 'play'){
-    const t = G.seats[G.turn];
-    if (G.turn === i) return `<div class="status" style="color:var(--gold)">It's your turn</div>`;
-    return `<div class="status"><span>Waiting for ${esc(t.name)}…</span>${away ? `<button data-act="skip">Pack for ${esc(t.name)} (away)</button>` : ''}</div>`;
-  }
-  if (G.phase === 'sideAsk'){
-    const ss = G.sideshow;
-    return `<div class="status"><span>${esc(G.seats[ss.from].name)} asked ${esc(G.seats[ss.to].name)} for a side show. Waiting for an answer…</span>${away && ss.to !== i ? `<button data-act="skip">Refuse for ${esc(G.seats[ss.to].name)} (away)</button>` : ''}</div>`;
-  }
+  if (!away) return '';
+  if (G.phase === 'play' && G.turn !== i){ const t = G.seats[G.turn]; return `<div class="status"><button data-act="skip">Pack for ${esc(t.name)} (away)</button></div>`; }
+  if (G.phase === 'sideAsk' && G.sideshow.to !== i) return `<div class="status"><button data-act="skip">Refuse the side show for ${esc(G.seats[G.sideshow.to].name)} (away)</button></div>`;
   return '';
 }
 
@@ -864,7 +1059,7 @@ function lobbyHTML(){
   return `<section class="panel hl result">
     <h2>Waiting for players</h2>
     <p class="muted">${n} of 6 seated. Send the room code or link to everyone. You need at least 2 players to start.</p>
-    <p class="muted">Boot ${G.boot} · starting coins ${G.startCoins.toLocaleString()}${G.potLimit ? ' · pot limit ' + G.potLimit.toLocaleString() : ''}</p>
+    <p class="muted">Boot ${G.boot} · starting coins ${G.startCoins.toLocaleString()}${G.potLimit ? ' · pot limit ' + G.potLimit.toLocaleString() : ''} · ${G.turnSec ? G.turnSec + ' seconds per turn' : 'no turn timer'}</p>
     <div class="btns">${i >= 0 ? `<button class="gold" data-act="next" ${n >= 2 ? '' : 'disabled'}>Deal first round</button>${V.mode === 'client' ? '<button data-act="leaveSeat">Leave seat</button>' : ''}` : ''}</div>
     ${botControls()}
   </section>`;
@@ -879,19 +1074,17 @@ function resultHTML(){
   const r = G.result; if (!r) return '';
   const i = mySeat();
   const canAct = V.mode === 'local' || i >= 0;
-  const shown = r.hands.length ? `<div class="cmp">${r.hands.map(h => `<div class="side ${h.win ? 'win' : ''}"><b>${esc(h.name)}</b><div class="mini">${h.cards.map(c => cardHTML(c, true, 'sm')).join('')}</div><span class="why">${esc(evaluate(h.cards).name)}</span></div>`).join('')}</div>` : '';
-  const bal = G.seats.map((P,k) => `<div class="r"><span>${esc(P.name)}${online() && P.uid === PID ? ' (you)' : ''}</span><span class="row">${coins(P.coins)}</span></div>`).join('');
+  const order = [...r.hands].sort((a, b) => (b.win - a.win) || (a.packed - b.packed) || cmp(evaluate(b.cards), evaluate(a.cards)));
+  const hands = order.length ? `<div class="cmp">${order.map(h => `<div class="side ${h.win ? 'win' : ''}"><b>${esc(h.name)}${h.win ? ' 🏆' : ''}</b><div class="mini">${h.cards.map(c => cardHTML(c, true, 'sm')).join('')}</div><span class="why">${esc(evaluate(h.cards).name)}</span>${h.packed ? '<span class="pill packed">Packed</span>' : ''}</div>`).join('')}</div>` : '';
   const canNext = G.seats.filter(P => P.coins >= G.boot).length >= 2;
   return `<section class="panel hl result">
-    <div class="muted">Round ${G.roundNo}</div>
     <div class="big">${esc(r.names.join(' & '))} ${r.winners.length > 1 ? 'split' : 'wins'} ${coins(r.pot)}</div>
-    ${r.winHand ? `<div class="handname">${esc(r.winHand)}</div>` : ''}
     <p class="muted">${esc(r.reason)}</p>
-    ${shown}
-    <div class="bal">${bal}</div>
     <div class="btns">${canAct ? `<button class="gold" data-act="next" ${canNext ? '' : 'disabled'}>Deal next round</button>` : ''}
       ${V.mode === 'client' && i >= 0 ? '<button data-act="leaveSeat">Leave seat</button>' : ''}</div>
     ${canNext ? '' : '<p class="why">Fewer than two players can pay the boot. Tap New game at the top to give everyone their starting coins again.</p>'}
+    <h3 style="font-size:1.1rem">Everyone's cards</h3>
+    ${hands}
     ${botControls()}
   </section>`;
 }
@@ -966,18 +1159,19 @@ function render(){
 
   const showGame = !!G && !(online() && V.netErr);
   show('game', showGame);
-  if (!showGame){ $('ov').hidden = true; $('sub').textContent = 'Pretend coins only · no sign-up'; return; }
+  if (!showGame){ FX.prev = null; $('ov').hidden = true; $('sub').textContent = 'Pretend coins only · no sign-up'; return; }
 
   $('sub').textContent = `${m === 'local' ? 'Pass and play' : 'Online'} · ${G.phase === 'lobby' ? 'lobby' : 'round ' + G.roundNo} · boot ${G.boot}${G.potLimit ? ' · pot limit ' + G.potLimit.toLocaleString() : ''}`;
-  $('game').innerHTML = `<div style="display:flex;flex-direction:column;gap:16px">
+  const prevSnap = FX.prev;
+  $('game').innerHTML = `<div style="display:flex;flex-direction:column;gap:12px">
     ${G.phase === 'lobby' ? lobbyHTML() : ''}
-    ${G.phase === 'roundEnd' ? resultHTML() : ''}
-    ${G.phase !== 'lobby' ? `<div class="pot"><span class="lbl">Pot</span><span class="amt num">${G.pot.toLocaleString()}</span><span class="meta">Stake ${G.stake} · blind bets ${G.stake}, seen bets ${G.stake*2}</span></div>` : ''}
+    ${tableHTML()}
     ${statusHTML()}
-    <div class="seats">${G.seats.map(seatHTML).join('')}</div>
     ${dockHTML()}
+    ${G.phase === 'roundEnd' ? resultHTML() : ''}
     <ul class="log" aria-live="polite">${G.log.map(l => `<li>${esc(l)}</li>`).join('')}</ul>
   </div>`;
+  animateChips(prevSnap); tickClock();
   const ov = overlayHTML();
   $('ov').innerHTML = ov; $('ov').hidden = !ov;
   syncVoice();
@@ -990,7 +1184,7 @@ function setUrlRoom(code){ try { const u = new URL(location.href); if (code) u.s
 function onAct(a, arg){
   switch (a){
     case 'home':
-      leaveNet(); G = null; HG = null; V.net = ''; V.netErr = ''; V.mode = 'home'; setUrlRoom(''); render(); return;
+      leaveNet(); clearTimeout(turnTimer); clearTimeout(botTimer); G = null; HG = null; V.net = ''; V.netErr = ''; V.mode = 'home'; setUrlRoom(''); render(); return;
     case 'goHost': V.mode = 'hostSetup'; render(); $('hName').focus(); return;
     case 'goBots': $('hBots').value = '2'; V.mode = 'hostSetup'; render(); $('hName').focus(); return;
     case 'addBot': case 'removeBot': request({a}); return;
@@ -1000,7 +1194,7 @@ function onAct(a, arg){
       const name = $('hName').value.trim().slice(0, 14);
       if (!name){ toast('Enter your name first.'); $('hName').focus(); return; }
       store.set(K.name, name);
-      const cfg = {startCoins:intVal('hCoins', 1000, 10), boot:intVal('hBoot', 10, 1), potLimit:Math.max(0, Math.floor(+$('hLimit').value || 0))};
+      const cfg = {startCoins:intVal('hCoins', 1000, 10), boot:intVal('hBoot', 10, 1), potLimit:Math.max(0, Math.floor(+$('hLimit').value || 0)), turnSec:+$('hTimer').value || 0};
       V.code = newCode();
       HG = newGame(cfg); HG.seats.push(newSeat(PID, name, cfg.startCoins)); glog(HG, `${name} opened room ${V.code}.`);
       for (let b = +$('hBots').value || 0; b > 0; b--) addBot(HG);
@@ -1008,7 +1202,7 @@ function onAct(a, arg){
     }
     case 'resumeHost': {
       try { const s = JSON.parse(store.get(K.host)); V.code = s.code; HG = s.g; if (s.pid){ PID = s.pid; try { sessionStorage.setItem(K.pid, PID); } catch(e){} } } catch(e){ toast("That room couldn't be restored."); return; }
-      V.mode = 'host'; setUrlRoom(V.code); broadcast(); startHosting(); return;
+      HG.turnAt = Date.now(); V.mode = 'host'; setUrlRoom(V.code); broadcast(); startHosting(); return;
     }
     case 'joinRoom': {
       const name = $('jName').value.trim().slice(0, 14);
@@ -1037,12 +1231,12 @@ function onAct(a, arg){
     case 'mute': toggleMute(); return;
     case 'localStart': {
       const n = +$('cnt').value, each = intVal('startCoins', 1000, 10);
-      const g = newGame({boot:intVal('boot', 10, 1), potLimit:Math.max(0, Math.floor(+$('potLimit').value || 0)), startCoins:each});
+      const g = newGame({boot:intVal('boot', 10, 1), potLimit:Math.max(0, Math.floor(+$('potLimit').value || 0)), startCoins:each, turnSec:+$('lTimer').value || 0});
       for (let i = 0; i < n; i++) g.seats.push(newSeat('L' + i, ($('n'+i).value.trim() || 'Player ' + (i+1)).slice(0, 14), each));
       G = g; runLocal(x => startRound(x) || x); return;
     }
     case 'localResume': try { G = JSON.parse(store.get(K.local)); } catch(e){ G = null; } render(); return;
-    case 'ready': V.readyKey = G.moveN; V.reveal = false; render(); return;
+    case 'ready': V.readyKey = G.moveN; V.readyAt = Date.now(); V.reveal = false; render(); return;
     case 'toggle': V.reveal = !V.reveal; render(); return;
     case 'see': V.reveal = true; V.revealRound = G.roundNo; request({a:'see'}); return;
     case 'sidePeek': V.sidePeek = G.lastSide.id; render(); return;
